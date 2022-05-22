@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.deposit_system.mapper.UCMapper">
+    <select id="findbyuid" resultType="com.example.deposit_system.entity.UC" parameterType="Integer">
+        select * from tb_uc where uid=#{uid}
+    </select>
+    <insert id="addUC" parameterType="com.example.deposit_system.entity.UC">
+        insert into tb_uc values (#{uid},#{cid})
+    </insert>
+    <delete id="deleteUC" parameterType="com.example.deposit_system.entity.UC">
+        delete from tb_uc where cid=#{cid}
+    </delete>
+    <select id="findall" resultType="com.example.deposit_system.entity.UC" parameterType="Integer">
+        select * from tb_uc where uid=#{uid}
+    </select>
+</mapper>

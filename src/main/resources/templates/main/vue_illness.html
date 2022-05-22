@@ -1,0 +1,249 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>疫情统计</title>
+  <link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+  <script type="text/javascript" src="../js/vue.js"></script>
+  <link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+  <script type="text/javascript" src="../element-ui/lib/index.js"></script>
+  <script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+  <script type="text/javascript" src="../js/axios.js"></script>
+    <script type="text/javascript" src="../js/login.js"></script>
+  <style type="text/css">
+   .el-main{
+    width: 100%;
+    height: 500px;
+   }
+    #div1{
+      float: left;
+      margin-left: 100px;
+      width: 600px;
+      height: 400px;
+      background-color:#DCDFE6;
+      margin-top: 30px;
+      border-radius: 30px;
+    }
+    #div3{
+      background-color:white;
+      float: left;
+      margin-top: 50px;
+    }
+    #u,#p{
+      float: left;
+      list-style: none;
+      text-align: center;
+      vertical-align: middle;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      padding-top: 10px;
+      width: 300px;
+      height: 40px;
+      margin-top: 20px;
+      background-color: #E6A23C;
+      margin-top: -20px;
+    }
+    #u{
+      margin-left: -40px;
+    }
+    #user{
+      margin-top: 20px;
+      float: left;
+      width: 600px;
+      height: 200px;
+      background-color: white;
+    }
+    #phone{
+       margin-top: 20px;
+      float: left;
+    }
+    .leiji,.heal,.dead{
+      float: left;
+      width: 200px;
+      height: 150px;
+    }
+    h4,h1,h5{
+      text-align:center;
+      font-weight: bold;
+    }
+    #place{
+      float: left;
+      width: 600px;
+      height: 50px;
+    }
+   .time{
+       float: left;
+       width: 600px;
+       height: 50px;
+   }
+  </style>
+  
+</head>
+<body>
+  <div id="div">
+  
+<el-container>
+  <el-main>
+    <div id="div1">
+      <div id="div3">
+        {{getcitys()}}
+        <ul>
+          <li id="u">全国疫情</li>
+          <li id="p">{{value}}疫情</li>
+        </ul>
+        <div id="user">
+            <div class="leiji">
+              <h4>累计确诊</h4>
+              <h1 style="color: #F56C6C;">{{all.allconfirm}}</h1>
+              <h5>较昨日+<span style="color: #F56C6C;">{{all.todayconfirm}}</span></h5>
+            </div>
+             <div class="heal">
+              <h4>累计治愈</h4>
+              <h1 style="color: #67C23A;">{{all.allheal}}</h1>
+              <h5>较昨日+<span style="color: #67C23A;">{{all.todayheal}}</span></h5>
+            </div>
+             <div class="dead">
+              <h4>累计死亡</h4>
+              <h1 style="color: #909399;">{{all.alldead}}</h1>
+              <h5>较昨日+<span style="color: #909399;">{{all.todaydead}}</span></h5>
+            </div>
+            <div class="time" ><h6 style="margin-left: 60px;">更新时间:<span>{{all.time}}</span></h6></div>
+        </div>
+        <div id="phone">
+            <div class="leiji">
+              <h4>累计确诊</h4>
+              <h1 style="color: #F56C6C;">{{diqu.totalconfirm}}</h1>
+              <h5>较昨日+<span style="color: #F56C6C;">{{diqu.todayconfirm}}</span></h5>
+            </div>
+             <div class="heal">
+              <h4>累计治愈</h4>
+              <h1 style="color: #67C23A;">{{diqu.totalheal}}</h1>
+              <h5>较昨日+<span style="color: #67C23A;">{{diqu.todayheal}}</span></h5>
+            </div>
+             <div class="dead">
+              <h4>累计死亡</h4>
+              <h1 style="color: #909399;">{{diqu.totaldead}}</h1>
+              <h5>较昨日+<span style="color: #909399;">{{diqu.todaydead}}</span></h5>
+            </div>
+            <div class="time" ><h6 style="margin-left: 60px;">更新时间:<span>{{diqu.time}}</span></h6></div>
+            <div id="place">
+                <template>
+                  <el-select v-model="value" placeholder="请选择" style=" float: right;" @change="selectChanged">
+                    <el-option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
+                </template>
+            </div>
+        </div>
+      </div>
+
+    </div>
+   
+    
+  </el-main>
+  
+</el-container>
+  </div>
+</body>
+<script type="text/javascript">
+new Vue({
+  el:"#div",
+  data:{
+    flag:true,
+    value:"北京",
+    all:{
+        allconfirm:"-",
+        allheal:"-",
+        alldead:"-",
+        todayconfirm:"-",
+        todayheal:"-",
+        todaydead:"-",
+        time:"-",
+    },
+    diqu:{
+        totalconfirm:"-",
+        totalheal:"-",
+        totaldead:"-",
+        todayconfirm:"-",
+        todayheal:"-",
+        todaydead:"-",
+        time:"-",
+    },
+    code:"",
+    options:[{
+      value:"北京",
+      label:"北京",
+    },{
+      value:"北",
+      label:"北",
+
+    },{
+      value:"北京",
+      label:"北京",
+    }]
+      
+  },
+  methods:{
+      getcitys(){
+         var that = this;
+         if(that.flag){
+             axios.post("/twocity")
+                 .then(function (response) {
+                    that.options = response.data;
+                    that.getcity();
+                    that.getquanguo();
+                    that.getdiqu();
+                    that.flag = false;
+                 }, function (err) {
+                     alert(err);
+                 });
+         }
+      },
+      selectChanged(value){
+          var that = this;
+          axios.post("/changecode","city="+value)
+              .then(function (response) {
+                  that.code = response.data;
+                  that.getdiqu();
+              }, function (err) {
+                  alert(err);
+              });
+      },
+      getquanguo(){
+          var that = this;
+          axios.post("/quanguo")
+              .then(function (response) {
+                    that.all = response.data;
+              }, function (err) {
+                  alert(err);
+              });
+      },
+      getdiqu(){
+          var that = this;
+          axios.post("/diqu","code="+that.code)
+              .then(function (response) {
+                  that.diqu = response.data;
+              }, function (err) {
+                  alert(err);
+              });
+      },
+      getcity(){
+          var that = this;
+          axios.post("/city")
+              .then(function (response) {
+                  that.value = response.data;
+              }, function (err) {
+                  alert(err);
+              });
+      }
+  },
+})
+</script>
+
+</html>

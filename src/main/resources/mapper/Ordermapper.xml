@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.deposit_system.mapper.OrderMapper">
+    <select id="findAll" resultType="com.example.deposit_system.entity.Order" >
+        SELECT * FROM tb_order
+    </select>
+    <select id="findallOrder" resultType="com.example.deposit_system.entity.Order" parameterType="Integer">
+        SELECT o.oid,o.uid,o.cid,c.cname,c.cphone,c.caddress,c.ccity,o.wid,o.hid,o.starttime,o.endtime,o.status,o.audit,o.items,o.items_img,o.otype,o.cmessage FROM tb_order o,tb_user u,tb_consignee c,tb_warehouse h,tb_worker w WHERE u.uid = o.uid AND o.cid = c.cid AND o.wid = w.wid AND o.hid = h.hid AND o.uid =#{uid}
+    </select>
+    <select id="findorderbywid" resultType="com.example.deposit_system.entity.Order" parameterType="Integer">
+        SELECT o.oid,o.uid,o.cid,c.cname,c.cphone,c.caddress,c.ccity,o.wid,o.hid,o.starttime,o.endtime,o.status,o.audit,o.items,o.items_img,o.otype,o.cmessage FROM tb_order o,tb_user u,tb_consignee c,tb_warehouse h,tb_worker w WHERE u.uid = o.uid AND o.cid = c.cid AND o.wid = w.wid AND o.hid = h.hid AND o.wid =#{wid}
+    </select>
+    <insert id="addOrder" parameterType="com.example.deposit_system.entity.Order">
+        insert into tb_order values (#{oid},#{uid},#{wid},#{cid},#{hid},#{starttime},#{endtime},#{status},#{audit},#{items},#{items_img},#{otype},#{cmessage})
+    </insert>
+    <update id="modifyordr" parameterType="com.example.deposit_system.entity.Order">
+        update tb_order set wid=#{wid},endtime=#{endtime},status=#{status},audit=#{audit},items=#{items},items_img=#{items_img},otype=#{otype},cmessage=#{cmessage} where oid =#{oid}
+    </update>
+    <delete id="deleteOrder" parameterType="String">
+        delete from tb_order where oid=#{oid}
+    </delete>
+</mapper>

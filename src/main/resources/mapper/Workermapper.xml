@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.deposit_system.mapper.WorkerMapper">
+    <select id="findall" resultType="com.example.deposit_system.entity.Worker" parameterType="String">
+        select * from tb_worker where wtype=#{wtype}
+    </select>
+    <select id="findbyName" resultType="com.example.deposit_system.entity.Worker" parameterType="String">
+        select * from tb_worker where wname=#{wname}
+    </select>
+    <select id="findbyPhone" resultType="com.example.deposit_system.entity.Worker" parameterType="String">
+        select * from tb_worker where wphone=#{wphone}
+    </select>
+    <insert id="addWorker" parameterType="com.example.deposit_system.entity.Worker">
+        insert into tb_worker values (#{wid},#{wname},#{wpwd},#{wphone},#{wtype},#{whead_img})
+    </insert>
+    <update id="modifyWorker" parameterType="com.example.deposit_system.entity.Worker">
+        update tb_worker set wname=#{wname},wpwd=#{wpwd},wphone=#{wphone},wtype=#{wtype},whead_img=#{whead_img} where wid=#{wid}
+    </update>
+    <delete id="deleteWorker" parameterType="com.example.deposit_system.entity.Worker">
+        delete from tb_worker where wid=#{wid}
+    </delete>
+</mapper>

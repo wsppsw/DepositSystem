@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>验证手机</title>
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<style type="text/css">
+	.el-form{
+		margin-top: 20px;
+		margin-left: 140px;
+	}
+	</style>
+</head>
+<body>
+	<div id="div">
+        {{getfindname()}}
+		<el-form :model="userForm1" status-icon  ref="userForm1" size="small" label-width="100px">
+          <el-form-item label="手机号" prop="userphone" :rules="[
+           { required: true, message: '手机号不能为空！', trigger: 'blur' },
+          ]">
+          <el-col :span="10">
+          <el-input  clearable placeholder="请输入手机号" v-model.number="userForm1.userphone"  :disabled="true"></el-input>
+          </el-col>
+          <el-link type="primary" @click="sendPhone" :underline="false" :disabled="disabled" style="margin-left: 10px;">{{code}}</el-link>
+         </el-form-item>
+         <span style="color: #F56C6C; font-size: 10px; margin-left: 100px;" >{{codeerr}}</span>
+         <el-form-item label="验证码" prop="c_code" :rules="[
+          { required: true, message: '验证码不能为空！', trigger: 'blur' },
+          { min: 4, message: '请输入4个长度的验证码', trigger: 'blur'}
+         ]"> 
+         <el-col :span="10">
+          <el-input   clearable placeholder="请输入验证码" v-model="userForm1.c_code" ref="ucode"></el-input>
+          </el-col>
+         </el-form-item>
+
+         <el-form-item>
+          <el-button type="primary" @click="submitForm1('userForm1')">验证手机</el-button>
+      </el-form-item>
+       </el-form>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#div",
+	data:{
+		userForm1:{
+			userphone:"",
+        	c_code:"",
+		},
+		code:"点击获取验证码",
+        codeerr:"",
+        phone:"",
+        flag:true,
+	},
+	methods:{
+	        getfindname(){
+	            var that = this;
+	            if(that.flag){
+	                that.flag = false;
+                    axios.post("/finduserphone")
+                        .then(function(response){
+                            if(response.data != null){
+                                that.phone = response.data;
+                                var name = that.phone.toString();
+                                that.userForm1.userphone = name.substring(0,3)+"****"+name.substring(7);
+                            }
+                        },function(err){
+                            alert(err);
+                        });
+                }
+
+            },
+			sendPhone:function(){
+	            var that = this;
+                axios.post("/sendphone", "phone=" + that.phone)
+                    .then(function (response) {
+                        if (response.data != null) {
+                            let seconds = 60;
+                            that.disabled = true;
+                            that.code = "已经发送(" + seconds + "s)";
+                            var time = setInterval(function () {
+                                seconds = seconds - 1;
+                                that.disabled = true;
+                                that.code = "已经发送(" + seconds + "s)";
+                                let i = seconds;
+                                if (i < 0) {
+                                    i = 1;
+                                    clearInterval(time);
+                                    that.disabled = false;
+                                    that.code = "点击获取验证码";
+                                }
+                            }, 1000);
+                            alert(response.data);
+                        }
+                    }, function (err) {
+                        alert(err);
+                    });
+
+	       		 
+			},
+			submitForm1:function(userForm1){
+                var that = this;
+                this.$refs[userForm1].validate((valid) => {
+                    if (valid) {
+                        axios.post("/findUserbyP","code="+that.userForm1.c_code)
+                            .then(function(response){
+                                if(response.data==true){
+                                    location.href="/newPwd";
+                                }else{
+                                    that.userForm1.c_code="";
+                                    that.$refs.ucode.focus();
+                                    that.codeerr=response.data;
+                                }
+                            },function(err){
+                                alert(err);
+                            });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+	}
+})
+</script>
+</html>

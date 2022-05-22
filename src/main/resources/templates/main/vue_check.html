@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>待审核</title>
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+</head>
+<body>
+	<div id="app">
+        {{getchecko()}}
+        <el-table :data="tableData" @row-click="clickRow"  @selection-change="handleSelectionChange" style="border-radius: 20px;" height="300">
+            <el-table-column prop="cname" label="收货人" width="100">
+            </el-table-column>
+            <el-table-column prop="cphone" label="联系电话" width="200">
+            </el-table-column>
+            <el-table-column prop="caddress" label="收货地址" width="450">
+            </el-table-column>
+            <el-table-column prop="otype" label="服务类型" >
+            </el-table-column>
+            <el-table-column prop="items" label="寄存物品" >
+            </el-table-column>
+            <el-table-column label="状态" width="180">
+                <template slot-scope="scope">
+                    <i class="el-icon-loading" style="font-size: 20px;"></i>审核中
+                    <el-button type="warning" icon="el-icon-edit" circle @click="editC(scope.row)" ></el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#app",
+	data:{
+		tableData:[
+		{
+		    oid:"",
+            cid:"",
+			cname:"",
+			cphone:"",
+			caddress:"",
+			otype:"",
+			items:"",
+		}
+		],
+    pageSize:"3",//一页显示数量
+    pageNum:"1",//当前页码
+    pages:[],//总共页数
+    pageFirst:"",//首页
+    pageLast:"",//尾页
+    flago:true,
+	},
+	methods:{
+	    getchecko(){
+	        var that = this;
+	        if(that.flago){
+                axios.post("/checkOrder")
+                .then(function (response) {
+                    that.tableData = response.data;
+                    that.flago = false;
+                 }, function (err) {
+                        alert(err);
+                });
+            }
+        },
+		editC(row){
+	      var that = this;
+		  this.$confirm('取消审核后再次提交还需审核, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+           axios.post("/CancecheckOrder","oid="+row.oid)
+              .then(function (response) {
+                  that.tableData = response.data;
+               }, function (err) {
+                    alert(err);
+           });
+          this.$message({
+            type: 'success',
+            message: '取消审核成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消'
+          });          
+        });
+		},
+
+	}
+})
+</script>
+</html>

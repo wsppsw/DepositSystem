@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>哪都通找回密码</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<style type="text/css">
+	.el-header,.el-footer {
+     background-color: #E6A23C;
+      width: 100%; 
+   }
+   .el-main{
+    background-color: #F2F6FC;
+    width: 100%;
+    height: 500px;
+   }
+   .el-footer p{
+      text-align: center;
+    }
+    #div1{
+    	position: absolute;
+		top: 0;
+		left: 0;
+		bottom: 0;
+		right: 0;
+		margin: auto;
+    	background-color: white;
+    	border-radius: 30px;
+    	width: 618px;
+    	height: 200px;
+    }
+	</style>
+</head>
+<body>
+	<div id="div">
+<el-container>
+  <el-header>
+  	<el-image
+      style="width: 100px; height: 60px; float: left; margin-left: -20px;"
+      :src="logo"
+      :fit="none"></el-image>
+      <p style="color: white; float: left; margin-left: 10px;">哪都通，一个什么都做的神秘机构</p>
+  </el-header>
+  <el-main>
+		<div id="div1">
+			<iframe :src="Iframe" frameborder="false" style="width: 100%; height: 100%; ">
+				
+			</iframe>
+		</div>
+  </el-main>
+  <el-footer>
+    <p style="color: white;">@Copyright 2021 - 2022 侵权必究</p>
+  </el-footer>
+</el-container>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#div",
+	data:{
+		logo:"img_head/ico/logo.jpg",
+		Iframe:"/verifyuser",
+		
+	},
+	methods:{
+
+	}
+})
+</script>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>修改信息</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+  	<script type="text/javascript" src="../js/vue.js"></script>
+  	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+  	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+ 	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+  	<script type="text/javascript" src="../js/axios.js"></script>
+  	<style type="text/css">
+	#div1{
+		float: left;
+		width: 800px;
+		height: 520px;
+		background-color: #E6A23C;
+		border-radius: 30px;
+		margin-left: 150px;
+	}
+	#div2{
+		float: left;
+		width: 600px;
+		height: 420px;
+		background-color: #E9EEF3;
+		border-radius: 30px;
+		margin-left: 100px;
+		margin-top: 50px; 
+	}
+	.el-form{
+		margin-left: 120px;
+		margin-top: 50px; 
+	}
+  	</style>
+</head>
+<body>
+	<div id="modifyUser">
+		<div id="div1">
+		<div id="div2">{{getUser()}}
+		<el-form :model="DataForm" status-icon  ref="DataForm" size="medium" label-width="100px" :label-position="left">
+		 <el-form-item label="头像" prop="userhead" >
+         	<el-link  :underline="false" @click="modifyhead" style="margin-left: 50px"><el-avatar :size="40" :src="DataForm.userhead"></el-avatar></el-link>
+         </el-form-item>
+          <el-form-item label="用户名" prop="username" >
+          <el-col :span="10">
+          <el-input  clearable placeholder="请输入用户名" v-model="DataForm.username" :disabled="true"></el-input>
+          </el-col>
+         </el-form-item>
+          <el-form-item label="预留手机号" prop="userphone" >
+          <el-col :span="10">
+          <el-input  clearable placeholder="请输入手机号" v-model.number="DataForm.userphone" :disabled="true" ></el-input>
+          </el-col>
+          <el-link type="warning" @click="sendPhone" :underline="false" :disabled="disabled" >{{code}}</el-link>
+         </el-form-item>
+			<span style="color: #F56C6C; font-size: 10px; margin-left: 100px;" >{{codeerr}}</span>
+      	<el-form-item label="验证码" prop="vcode" :rules="[
+          { required: true, message: '验证码不能为空！', trigger: 'blur' },
+          { min: 4, message: '请输入4个长度的验证码', trigger: 'blur'}
+         ]"> 
+         <el-col :span="10">
+          <el-input  clearable placeholder="请输入验证码" v-model="DataForm.vcode" ref="ucode"></el-input>
+          </el-col>
+         </el-form-item>
+          <el-form-item label="更改手机号" prop="userphone1" :rules="[
+           { required: true, message: '手机号不能为空！', trigger: 'blur' },
+          { type: 'number', message: '手机号格式错误！', trigger: ['blur', 'change'] },
+          { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'},
+          { pattern: /^[1][3|5|7|8|9][0-9]+$/, message: '手机号格式错误'}
+          ]">
+          <el-col :span="10">
+          <el-input  clearable placeholder="请输入更改后手机号" v-model.number="DataForm.userphone1" ></el-input>
+          </el-col>
+          </el-form-item>
+         <el-form-item>
+          <el-button type="warning" @click="submitForm('DataForm')">更改</el-button>
+      </el-form-item>
+      </el-form>
+	      <el-dialog title="更换头像" :visible.sync="dialogheadimg" width="500px" height="400px">
+	      	<el-upload
+			  class="upload-demo"
+			  ref="upload"
+			  action="/fileup"
+			  :auto-upload="false"
+			  :limit=1
+			  :show-file-list="true"
+			  accept="image/png,image/gif,image/jpg,image/jpeg"
+			  list-type="picture-card"
+			  :on-exceed="handleExceed"  
+			  :before-upload="handleBeforeUpload"
+			  :on-preview="handlePictureCardPreview"
+			  :on-remove="handleRemove"
+			  :on-success="handleAvatarSuccess" >
+			 <el-button size="small" type="primary">点击上传</el-button>
+			</el-upload>
+			  <el-button type="primary" size="small" :style="{ display: visibleupload }" @click="uploadFile">上传<i class="el-icon-upload el-icon--right"></i></el-button>
+				<el-image style="width: 400px; height: 400px; margin-left:20px" :src="dialogImageUrl" ></el-image>
+		  </el-dialog>
+		</div>
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#modifyUser",
+	data:{
+		DataForm:{
+			userhead:"img_head/3.png",
+      		username:"张三",
+      		userphone:"15027707570",
+      		userphone1:"",
+			vcode:"",
+      	},
+      	code:"点击获取验证码",
+      	disabled:false,//判断验证码倒计时
+		dialogheadimg:false,//修改头像对话框
+		dialogImageUrl:"",
+		flaguser:true,
+		visibleupload:"none",//控制上传按钮显示与隐藏
+		codeerr:"",
+		flagphone:true,
+	},
+	methods:{
+		getUser(){
+			var that =this;
+			if(that.flaguser){
+				axios.post("/AlreadyLogin")
+						.then(function (response) {
+							that.flaguser = false;
+							that.DataForm = response.data;
+							//alert(that.DataForm.username+","+that.DataForm.userphone+","+that.DataForm.userhead);
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		sendPhone:function(){
+			let seconds = 60;
+			var that = this;
+			that.disabled=true;
+			that.code= "已经发送("+seconds+"s)";
+			var time=setInterval(function(){
+			seconds =seconds - 1;
+			that.disabled=true;
+			that.code= "已经发送("+seconds+"s)";
+			if(that.flagphone){
+				axios.post("/Msphone", "phone=" + that.userphone)
+						.then(function (response) {
+							that.flagphone = false;
+							alert(response.data);
+						}, function (err) {
+							alert(err);
+						});
+			}
+
+			let i =seconds;
+			if(i<0){
+				i=1;
+				clearInterval(time);
+				that.disabled=false;
+				that.code="点击获取验证码";
+						
+			}
+			},1000);
+	       		 
+		},
+		submitForm:function(DataForm){
+		var that = this;
+		this.$refs[DataForm].validate((valid) => {
+          if (valid) {
+			  axios.post("/modifyphone","code="+that.DataForm.vcode+"&newphone="+that.DataForm.userphone1)
+					  .then(function (response) {
+						  if(response.data=="验证码不正确!"){
+							  that.$refs.ucode.focus();
+							  that.vcode = "";
+							  that.codeerr = response.data;
+						  }else {
+						  	that.codeerr = "";
+						  	that.$message({
+								  type: 'success',
+								  message: '修改成功!'
+							  });
+							  setTimeout(() => {
+								  location.href="/modifyUser";
+							  }, 2000);
+						  }
+					  }, function (err) {
+						  alert(err);
+					  });
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+		},
+		modifyhead(){
+			this.dialogheadimg=true; 
+			this.dialogImageUrl = this.DataForm.userhead;
+		},
+		// 上传文件之前的钩子
+    handleBeforeUpload(file){
+      //console.log('before')
+      if(!(file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/jpg' || file.type === 'image/jpeg')) {
+        this.$notify.warning({
+          title: '警告',
+          message: '请上传格式为image/png, image/gif, image/jpg, image/jpeg的图片'
+        })
+      }
+   //图片大小（字节）   alert(file.size);
+      let size = file.size / 1024 / 1024 / 2
+	//以M为单位	alert(size);
+      if(size > 2) {
+        this.$notify.warning({
+          title: '警告',
+          message: '图片大小必须小于2M'
+        })
+      }
+    },
+    // 文件超出个数限制时的钩子
+    handleExceed(files, fileList) {
+    	alert("超出数量！");
+    },
+    // 文件列表移除文件时的钩子
+    handleRemove(file, fileList) {
+      //console.log(file, fileList);
+      this.dialogImageUrl = this.DataForm.userhead;
+		this.visibleupload = "none";
+    },
+    // 点击文件列表中已上传的文件时的钩子
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+      this.dialogVisible = true;
+		this.visibleupload = "";
+    },
+    uploadFile() {
+      this.$refs.upload.submit();
+      this.dialogheadimg = false;
+      this.flaguser = true;
+      this.getUser();
+    },
+
+	}
+})
+</script>
+</html>

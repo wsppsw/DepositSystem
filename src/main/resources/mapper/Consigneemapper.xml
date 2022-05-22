@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.deposit_system.mapper.ConsigneeMapper">
+    <select id="findbycid" resultType="com.example.deposit_system.entity.Consignee" parameterType="Integer">
+        select * from tb_consignee where cid=#{cid}
+    </select>
+    <select id="findall" resultType="com.example.deposit_system.entity.Consignee">
+        select * from tb_consignee
+    </select>
+    <select id="find" resultType="com.example.deposit_system.entity.Consignee" parameterType="com.example.deposit_system.entity.Consignee">
+        select * from tb_consignee where cname=#{cname} and cphone=#{cphone} and caddress=#{caddress} and ccity=#{ccity}
+    </select>
+    <insert id="addConsignee" parameterType="com.example.deposit_system.entity.Consignee">
+        insert into tb_consignee values (null,#{cname},#{cphone},#{caddress},#{ccity})
+    </insert>
+    <update id="modeifyConsignee" parameterType="com.example.deposit_system.entity.Consignee">
+        update tb_consignee set cname=#{cname},cphone=#{cphone},caddress=#{caddress},ccity=#{ccity} where cid =#{cid}
+    </update>
+    <delete id="deleteConsignee" parameterType="com.example.deposit_system.entity.Consignee">
+        delete from tb_consignee where cid=#{cid}
+    </delete>
+    <select id="findC" resultType="com.example.deposit_system.entity.Consignee" parameterType="Integer">
+        SELECT c.cid,c.cname,c.cphone,c.caddress,c.ccity  FROM tb_user u,tb_uc uc,tb_consignee c WHERE u.uid=uc.uid AND uc.cid=c.cid AND u.uid=#{uid}
+    </select>
+</mapper>

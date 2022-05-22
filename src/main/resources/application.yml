@@ -1,0 +1,8 @@
+spring:
+  # thymeleaf
+  thymeleaf:
+    # 关闭缓存
+    cache: false
+  devtools:
+    livereload:
+      enabled: true

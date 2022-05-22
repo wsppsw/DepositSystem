@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>哪都通主界面</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<style type="text/css">
+	.el-header,.el-footer {
+     background-color: #E6A23C;
+      width: 100%; 
+   }
+   .el-main{
+    background-color: #F2F6FC;
+    width: 100%;
+    height: 600px;
+   }
+   .el-footer p{
+      text-align: center;
+    }
+    
+	</style>
+</head>
+<body>
+	<div id="main">
+	<el-container>
+	  <el-header>
+	  <el-container>
+		<el-image
+      style="width: 100px; height: 60px; float: left; margin-left: -20px;"
+      :src="logo"
+      :fit="none"></el-image>
+      <p style="color: white; float: left; margin-left: 10px;">哪都通，一个什么都做的神秘机构</p>
+	  <el-menu
+	  :default-active="activeIndex"
+	  mode="horizontal"
+	  @select="handleSelect"
+	  background-color="#E6A23C"
+	  text-color="white"
+	  active-text-color="white"
+	  style="margin-left: auto;">{{getheadimg()}}
+	  <el-menu-item index="1" style="font-size: 18px;">{{citys()}}{{city}}</el-menu-item>
+	  <el-menu-item index="2" style="font-size: 18px;"><el-image :src="ctype" :fit="none" style="margin-top: 10px;"></el-image></el-menu-item>
+	  <el-menu-item index="3" style="font-size: 18px;">{{weather()}}{{weatype}}</el-menu-item>
+	  <el-menu-item index="4" style="font-size: 18px;">{{wendu}}</el-menu-item>
+	  <el-menu-item index="5" style="font-size: 18px;" @click="modifyhead"><el-avatar :size="50" :src="img_head"></el-avatar></el-menu-item>
+		  <el-menu-item index="6" style="font-size: 18px;" @click="tologin" th:if="${session.username==null}">{{username}}</el-menu-item>
+		  <el-menu-item index="6" style="font-size: 18px;" th:if="${session.username}" th:text="${session.username}">{{username}}</el-menu-item>
+		  <el-menu-item index="7" style="font-size: 18px;" @click="toexit">{{exit}}</el-menu-item>
+	</el-menu>
+	</el-container>
+	  </el-header>
+	  <el-container>
+			<el-aside width="initial">
+		<el-menu :default-openeds="[]" class='demo' >
+      <el-submenu index="1">
+        <template slot="title"></template>
+        <el-menu-item-group>
+          <el-menu-item index="1-1" @click="index" href="vue_list.html"><i class="el-icon-menu"></i>返回首页</el-menu-item>
+          <el-menu-item index="1-2" @click="subscribe"><i class="el-icon-menu"></i>预约服务</el-menu-item>
+          <el-menu-item index="1-3" @click="check"><i class="el-icon-menu"></i>待审核订单</el-menu-item>
+          <el-menu-item index="1-4" @click="finish"><i class="el-icon-menu"></i>已完成订单</el-menu-item>
+          <el-menu-item index="1-5" @click="unfinish"><i class="el-icon-menu"></i>未完成订单</el-menu-item>
+          <el-menu-item index="1-6" @click="modifyOrder"><i class="el-icon-menu"></i>未通过订单</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+      <el-submenu index="2">
+        <template slot="title"></template>
+        <el-menu-item-group>
+          <el-menu-item index="2-1"  @click="modifyUser"><i class="el-icon-menu"></i>修改信息</el-menu-item>
+          <el-menu-item index="2-2" @click="modifyPwd"><i class="el-icon-menu"></i>修改密码</el-menu-item>
+          <el-menu-item index="2-3" @click="consignee"><i class="el-icon-menu"></i>收货地址</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+      <el-submenu index="3">
+        <template slot="title"></template>
+        <el-menu-item-group>
+          <el-menu-item index="3-1" @click="illness"><i class="el-icon-menu"></i>疫情状况</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+    </el-menu>
+    </el-aside>
+	    <el-main>
+			<iframe :src="Iframe" frameborder="false" style="height: 550px; width: 100%;"></iframe>
+	    </el-main>
+	  </el-container> 
+	  <el-footer>
+	       <p style="color: white;">@Copyright 2021 - 2022 侵权必究</p>
+	  </el-footer>
+	</el-container>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#main",
+	data:{
+		logo:"../img_head/ico/logo.jpg",
+		exit:"退出",
+		img_head:"../img_head/3.png",
+		username:"登录",
+		city:"昌平区",
+		weatype:"晴",
+		wendu:"18℃",
+		ctype:"../img/weather/qing.png",
+		Iframe:"/index",
+		flagcity:true,//判断城市是否定位
+		flagwea:true,//判断是否播报天气状况
+	},
+	methods:{
+		index(){
+			this.Iframe="/index";
+		},
+		modifyUser(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/modifyUser";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		modifyPwd(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/modifyPwd";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		modifyhead(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/modifyUser";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		subscribe(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/subscribe";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+
+		},
+		consignee(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/consignee";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		check(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/check";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		finish(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/finish";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		unfinish(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/unfinish";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		modifyOrder(){
+			var that = this;
+			axios.post("/verifyTologin")
+					.then(function (response) {
+						if (response.data == true) {
+							that.Iframe="/modifyOrder";
+						}else {
+							location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		tologin(){
+			window.location.href="/login";
+		},
+		toexit(){
+			axios.post("/verifyexit")
+					.then(function (response) {
+						if (response.data != null) {
+							window.location.href="/login";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		getheadimg(){
+			var that = this;
+			axios.post("/Loginhead")
+					.then(function (response) {
+						if (response.data != null)
+							that.img_head = "../"+response.data;
+					}, function (err) {
+						that.img_head ="../img_head/2.png";
+					});
+		},
+		citys(){
+			var that = this;
+			if(that.flagcity) {
+				axios.post("/city")
+						.then(function (response) {
+							that.flagcity=false;
+							if (response.data != null) {
+								that.city = response.data;
+							} else {
+								that.city = "张家口";
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		weather(){
+			var that=this;
+			if(that.flagwea) {
+				axios.get("/weather?city=" + that.city)
+						.then(function (response) {
+							if (response.data != null) {
+								that.flagwea=false;
+								that.wendu = response.data.wendu;
+								that.weatype = response.data.type;
+								if (that.weatype == "晴") {
+									that.ctype = "../img/weather/qing.png";
+								} else if (that.weatype == "多云") {
+									that.ctype = "../img/weather/duoyun.png";
+								} else if (that.weatype == "阴") {
+									that.ctype = "../img/weather/yins.png";
+								} else if (that.weatype == "小雨") {
+									that.ctype = "../img/weather/xiaoyu.png";
+								} else if (that.weatype == "中雨") {
+									that.ctype = "../img/weather/zhongyu.png";
+								} else if (that.weatype == "大雨") {
+									that.ctype = "../img/weather/dayu.png";
+								} else if (that.weatype == "阵雨") {
+									that.ctype = "../img/weather/zhenyu.png";
+								} else if (that.weatype == "小雪") {
+									that.ctype = "../img/weather/xiaoxue.png";
+								} else if (that.weatype == "中雪") {
+									that.ctype = "../img/weather/zhongxue.png";
+								} else if (that.weatype == "大雪") {
+									that.ctype = "../img/weather/daxue.png";
+								} else if (that.weatype == "阵雪") {
+									that.ctype = "../img/weather/zhenxue.png";
+								} else if (that.weatype == "雷阵雨") {
+									that.ctype = "../img/weather/leiyu.png";
+								} else if (that.weatype == "霾") {
+									that.ctype = "../img/weather/mai.png";
+								} else {
+									that.ctype = "../img/weather/wu.png";
+								}
+							} else {
+								that.city = "张家口";
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		illness(){
+			var that = this;
+			that.Iframe="/illness";
+		}
+	}
+})
+</script>
+</html>

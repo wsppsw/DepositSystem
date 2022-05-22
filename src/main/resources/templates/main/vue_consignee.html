@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>收货地址</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<style type="text/css">
+	#order1{
+		width: 1050px;
+		height: 500px;
+		background-color: #E6A23C;
+		border-radius: 30px;
+	}
+	#order2{
+		float: left;
+		width: 1000px;
+		height: 450px;
+		background-color: #E9EEF3;
+		border-radius: 20px;
+		margin-left: 25px;
+		margin-top: 25px; 
+	}
+	#page{
+		margin-top: 20px; 
+		float: left;
+		width: 100%;
+		height: 50px;
+		text-align: center;
+	}
+	</style>
+</head>
+<body>
+	<div id="div">
+	<div id="order1">
+	<div id="order2">
+		{{getConsignee()}}
+		{{getCitysData()}}
+	  <el-table :data="consigneeData" @row-click="clickRow"  @selection-change="handleSelectionChange" style="border-radius: 20px;">
+      	<el-table-column prop="cname" label="收货人" width="100">
+        </el-table-column>
+        <el-table-column prop="cphone" label="联系电话" width="200">
+        </el-table-column>
+        <el-table-column prop="caddress" label="收货地址" width="450">
+        </el-table-column>
+        <el-table-column label="操作" width="250">
+        	<template slot-scope="scope">
+        	 <el-button type="warning" @click="modify(scope.row)" >修改</el-button>
+        	 <el-button type="danger" @click="del(scope.row)" >删除</el-button>
+  	 	 	</template>
+        </el-table-column>
+      </el-table>
+      <div id="page">
+		<el-button-group >
+ 		 <el-button type="primary" icon="el-icon-arrow" @click="getFirst">首页</el-button>
+ 	  </el-button-group>
+      <el-button-group v-for="page in pages" :key="page">
+ 		  <el-button type="primary" icon="el-icon-arrow" @click="getListPage(page)" >{{page}}页</el-button>
+ 		</el-button-group>
+ 		<el-button-group >
+  		<el-button type="primary" icon="el-icon-arrow-rihgt" @click="getLast">尾页</el-button>
+  		</el-button-group>
+  		 <el-button type="success" @click="add" style="float: right; margin-right: 10px;">添加</el-button>
+		</div>
+    </div>
+    </div>
+    <el-dialog title="添加收货地址" :visible.sync="dialogadd" width="500px" height="400px">
+		<el-form :model="form" status-icon  ref="form" size="medium" label-width="100px" style="">
+      	<span style="color: #F56C6C; font-size: 10px; margin-left: 100px;" >{{err}}</span>
+          <el-form-item label="收货人" :label-width="formLabelWidth" prop="cname" :rules="[
+           { required: true, message: '收货人不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]" >
+          <el-col :span="10">
+          <el-input   clearable placeholder="请输入收货人" v-model="form.cname" ref="cname"></el-input>
+          </el-col>
+         </el-form-item>
+         <el-form-item label="联系电话" :label-width="formLabelWidth" prop="cphone" :rules="[
+          { required: true, message: '联系电话不能为空！', trigger: 'blur' },
+          { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'},
+          { pattern: /^[1][3|5|7|8|9][0-9]+$/, message: '手机号格式错误'}
+         ]"> 
+         <el-col :span="10">
+          <el-input   clearable placeholder="请输入联系电话" v-model="form.cphone" ref="cphone"></el-input>
+          </el-col>
+         </el-form-item>
+         <el-form-item label="收货区域" :label-width="formLabelWidth" prop="ccity" :rules="[
+           { required: true, message: '收货区域不能为空！', trigger: 'blur' },]">
+			<el-col :span="16">
+			<el-cascader :options="options" clearable v-model="form.ccity" ref="ccity"></el-cascader>
+			</el-col>
+			</el-form-item>
+			<el-form-item label="收货地址" :label-width="formLabelWidth" prop="caddress" :rules="[
+           { required: true, message: '收货地址不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+			<el-col :span="20">
+			<el-input clearable placeholder="请输入收货地址" v-model="form.caddress" autocomplete="off" ref="caddress"></el-input>
+			</el-col>
+			</el-form-item>
+         <el-form-item>
+			 <template slot-scope="scope">
+           <el-button type="success" @click="addC('form')" style="float: right; margin-right: 10px;">添加</el-button>
+			 </template>
+     	 </el-form-item>
+       </el-form>
+    </el-dialog>
+		<el-dialog title="修改收货地址" :visible.sync="dialogmod" width="500px" height="400px">
+			<el-form :model="form1" status-icon  ref="form1" size="medium" label-width="100px" style="">
+				<el-form-item label="收货人" :label-width="formLabelWidth" prop="cname" :rules="[
+           { required: true, message: '收货人不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]" >
+					<el-col :span="10">
+						<el-input   clearable placeholder="请输入收货人" v-model="form1.cname" ref="cname"></el-input>
+					</el-col>
+				</el-form-item>
+				<el-form-item label="联系电话" :label-width="formLabelWidth" prop="cphone" :rules="[
+          { required: true, message: '联系电话不能为空！', trigger: 'blur' },
+          { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'},
+          { pattern: /^[1][3|5|7|8|9][0-9]+$/, message: '手机号格式错误'}
+         ]">
+					<el-col :span="10">
+						<el-input   clearable placeholder="请输入联系电话" v-model="form1.cphone" ref="cphone"></el-input>
+					</el-col>
+				</el-form-item>
+				<el-form-item label="收货区域" :label-width="formLabelWidth" prop="ccity" :rules="[
+           { required: true, message: '收货区域不能为空！', trigger: 'blur' },]">
+					<el-col :span="16">
+						<el-cascader :options="options" clearable v-model="form1.ccity" ref="ccity"></el-cascader>
+					</el-col>
+				</el-form-item>
+				<el-form-item label="收货地址" :label-width="formLabelWidth" prop="caddress" :rules="[
+           { required: true, message: '收货地址不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+					<el-col :span="20">
+						<el-input clearable placeholder="请输入收货地址" v-model="form1.caddress" autocomplete="off" ref="caddress"></el-input>
+					</el-col>
+				</el-form-item>
+				<el-form-item>
+					<template slot-scope="scope">
+						<el-button type="success" @click="modifyC('form1')" style="float: right; margin-right: 10px;">修改</el-button>
+					</template>
+				</el-form-item>
+			</el-form>
+		</el-dialog>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#div",
+	data:{
+		 consigneeData:[
+			 {
+				cid:"",
+				cname:"",
+				cphone:"",
+				caddress:"",
+				ccity:"",
+			 }
+		 ],
+		 form:{
+		 	cname:"",
+		 	cphone:"",
+		 	caddress:"",
+		 	ccity:"",
+		 },
+		form1:{
+		 	cid:"",
+			cname:"",
+			cphone:"",
+			caddress:"",
+			ccity:[],
+		},
+		formLabelWidth:'100px',
+		pageSize:"5",//一页显示数量
+		pageNum:"1",//当前页码
+		pages:[],//总共页数
+		pageFirst:"1",//首页
+		pageLast:"",//尾页
+		flag1:true,//获取行政城市集合数组
+		dialogadd:false,//添加收货地址弹窗
+		dialogmod:false,//修改地址弹窗
+		flag2:true,//获取收货地址
+		options:[],
+	},
+	methods:{
+		getCitysData(){
+			var that = this;
+			if(that.flag1){
+				axios.post("/getCitys")
+						.then(function (response) {
+							that.options = response.data;
+							that.flag1 = false;
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		getConsignee(){
+			var that = this;
+			if(that.flag2){
+				axios.post("/look","pageNum="+that.pageNum+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.flag2 = false;
+								that.consigneeData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		del(row){
+			var cid = row.cid;
+			var that = this;
+			that.$confirm('确定删除此条收货地址?', '提示', {
+				confirmButtonText: '确定',
+				cancelButtonText: '取消',
+				type: 'success'
+			}).then(() => {
+				axios.post("/deleteconsignee","cid="+cid+"&pageNum="+that.pageFirst+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							that.consigneeData = response.data.list;
+							that.pages = response.data.navigatepageNums;
+							that.pageFirst = response.data.navigateFirstPage;
+							that.pageLast = response.data.navigateLastPage;
+							that.$message({
+								type: 'success',
+								message: '删除成功!'
+							});
+						}, function (err) {
+							alert(err);
+						});
+			}).catch(() => {
+				that.$message({
+					type: 'warning',
+					message: '取消删除'
+				});
+			});
+		},
+		modify(row){
+			var that = this;
+			that.dialogmod =true;
+			that.form1.cid = row.cid;
+			that.form1.cname = row.cname;
+			that.form1.cphone = row.cphone;
+			that.form1.caddress = row.caddress;
+			that.form1.ccity = row.ccity.split(",");
+
+		},
+		add(){
+			this.dialogadd = true;
+		},
+		addC(form){
+			var that = this;
+ 			this.$refs[form].validate((valid) => {
+	          if (valid) {
+				  axios.post("/addconsignee","cname="+that.form.cname+"&cphone="+that.form.cphone+"&caddress="+that.form.caddress+"&ccity="+that.form.ccity+"&pageNum="+that.pageFirst+"&pageSize="+that.pageSize)
+						  .then(function (response) {
+							  that.consigneeData = response.data.list;
+							  that.pages = response.data.navigatepageNums;
+							  that.pageFirst = response.data.navigateFirstPage;
+							  that.pageLast = response.data.navigateLastPage;
+							  that.dialogadd = false;
+							  that.$message({
+								  type: 'success',
+								  message: '添加成功!'
+							  });
+							  that.form.cname="";
+							  that.form.cphone="";
+							  that.form.caddress="";
+							  that.form.ccity="";
+						  }, function (err) {
+							  alert(err);
+						  });
+	          } else {
+	            console.log('error submit!!');
+	            return false;
+	          }
+	        });
+		},
+		modifyC(form1){
+			var that = this;
+			this.$refs[form1].validate((valid) => {
+				if (valid) {
+					axios.post("/modifyconsignee","cid="+that.form1.cid+"&cname="+that.form1.cname+"&cphone="+that.form1.cphone+"&caddress="+that.form1.caddress+"&ccity="+that.form1.ccity+"&pageNum="+that.pageFirst+"&pageSize="+that.pageSize)
+							.then(function (response) {
+								that.consigneeData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								that.dialogmod = false;
+								that.$message({
+									type: 'success',
+									message: '修改成功!'
+								});
+							}, function (err) {
+								alert(err);
+							});
+				} else {
+					console.log('error submit!!');
+					return false;
+				}
+			});
+		},
+		getListPage(page){
+			var that = this;
+			var page = page;
+			axios.post("/look","pageNum="+page+"&pageSize="+that.pageSize)
+					.then(function (response) {
+						if(response.data!=null){
+							that.consigneeData = response.data.list;
+							that.pages = response.data.navigatepageNums;
+							that.pageFirst = response.data.navigateFirstPage;
+							that.pageLast = response.data.navigateLastPage;
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		getFirst(){
+			var that = this;
+			axios.post("/look","pageNum="+that.pageFirst+"&pageSize="+that.pageSize)
+					.then(function (response) {
+						if(response.data!=null){
+							that.consigneeData = response.data.list;
+							that.pages = response.data.navigatepageNums;
+							that.pageFirst = response.data.navigateFirstPage;
+							that.pageLast = response.data.navigateLastPage;
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		getLast() {
+			var that = this;
+			axios.post("/look","pageNum="+that.pageLast+"&pageSize="+that.pageSize)
+			.then(function (response) {
+				if(response.data!=null){
+					that.consigneeData = response.data.list;
+					that.pages = response.data.navigatepageNums;
+					that.pageFirst = response.data.navigateFirstPage;
+					that.pageLast = response.data.navigateLastPage;
+				}
+			}, function (err) {
+				alert(err);
+			});
+		},
+	}
+})
+</script>
+</html>

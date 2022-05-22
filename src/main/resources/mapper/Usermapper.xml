@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.deposit_system.mapper.UserMapper">
+    <select id="findbyName" resultType="com.example.deposit_system.entity.User" parameterType="String">
+        select * from tb_User where uname=#{uname}
+    </select>
+    <select id="findbyPhone" resultType="com.example.deposit_system.entity.User" parameterType="String">
+        select * from tb_User where phone=#{phone}
+    </select>
+    <select id="findall" resultType="com.example.deposit_system.entity.User">
+        select * from tb_User
+    </select>
+    <select id="findbyuid" resultType="com.example.deposit_system.entity.User" parameterType="Integer">
+        select * from tb_User where uid=#{uid}
+    </select>
+    <insert id="AddUser" parameterType="com.example.deposit_system.entity.User">
+        insert into tb_User values(null,#{uname},#{pwd},#{security1},#{answer1},#{security2},#{answer2},#{phone},#{img_head})
+    </insert>
+    <update id="updateUser" parameterType="com.example.deposit_system.entity.User">
+        update tb_User set pwd=#{pwd},security1=#{security1},answer1=#{answer1},security2=#{security2},answer2=#{answer2},phone=#{phone},img_head=#{img_head} where uid =#{uid}
+    </update>
+</mapper>

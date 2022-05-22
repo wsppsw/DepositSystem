@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>验证密保</title>
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+</head>
+<style type="text/css">
+	.el-form{
+		position: absolute;
+		margin-left: 3px;
+		float: left;
+	}
+</style>
+<body>
+	<div id="div">
+		<el-form :inline="true" :model="DataForm" ref="DataForm" class="demo-form-inline" size="small">
+		<span style="color: #F56C6C; font-size: 10px; margin-left: 88px;" >{{err}}</span>
+		<br>
+		  <el-form-item label="密保问题1" prop="security1" :rules="[
+           { required: true, message: '请选择密保问题1！', trigger: 'blur' }
+          ]">
+		  <el-col :span="25">
+		    <el-select v-model="DataForm.security1" placeholder="密保问题1">
+				<el-option label="您配偶的姓名是？" value="您配偶的姓名是？"></el-option>
+				<el-option label="您母亲的姓名是？" value="您母亲的姓名是？"></el-option>
+				<el-option label="您配偶的姓名是？" value="您配偶的姓名是？"></el-option>
+				<el-option label="您母亲的姓名是？" value="您母亲的姓名是？"></el-option>
+				<el-option label="您父亲的姓名是？" value="您父亲的姓名是？"></el-option>
+				<el-option label="您小学班主任的名字是？" value="您小学班主任的名字是？"></el-option>
+				<el-option label="您初中班主任的名字是？" value="您初中班主任的名字是？"></el-option>
+				<el-option label="您高中班主任的名字是？" value="您高中班主任的名字是？"></el-option>
+				<el-option label="您最熟悉的童年好友名字是？" value="您最熟悉的童年好友名字是？"></el-option>
+				<el-option label="您最熟悉的学校宿舍舍友是？" value="您最熟悉的学校宿舍舍友是？"></el-option>
+				<el-option label="对您影响最大的人名字是？" value="对您影响最大的人名字是？"></el-option>
+				<el-option label="您的学号（或工号）是？" value="您的学号（或工号）是？"></el-option>
+		    </el-select>
+		    </el-col>
+		  </el-form-item>
+		  <el-form-item label="答案1" prop="answer1" :rules="[
+           { required: true, message: '请回答密保问题1！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+		  	<el-col :span="12">
+		    <el-input v-model="DataForm.answer1" placeholder="答案1"></el-input>
+		    </el-col>
+		  </el-form-item>
+			<br>
+		   <el-form-item label="密保问题2" prop="security2" :rules="[
+           { required: true, message: '请选择密保问题2！', trigger: 'blur' }
+          ]">
+		   <el-col :span="25">
+		    <el-select v-model="DataForm.security2" placeholder="密保问题2">
+				<el-option label="您配偶的姓名是？" value="您配偶的姓名是？"></el-option>
+				<el-option label="您母亲的姓名是？" value="您母亲的姓名是？"></el-option>
+				<el-option label="您配偶的姓名是？" value="您配偶的姓名是？"></el-option>
+				<el-option label="您母亲的姓名是？" value="您母亲的姓名是？"></el-option>
+				<el-option label="您父亲的姓名是？" value="您父亲的姓名是？"></el-option>
+				<el-option label="您小学班主任的名字是？" value="您小学班主任的名字是？"></el-option>
+				<el-option label="您初中班主任的名字是？" value="您初中班主任的名字是？"></el-option>
+				<el-option label="您高中班主任的名字是？" value="您高中班主任的名字是？"></el-option>
+				<el-option label="您最熟悉的童年好友名字是？" value="您最熟悉的童年好友名字是？"></el-option>
+				<el-option label="您最熟悉的学校宿舍舍友是？" value="您最熟悉的学校宿舍舍友是？"></el-option>
+				<el-option label="对您影响最大的人名字是？" value="对您影响最大的人名字是？"></el-option>
+				<el-option label="您的学号（或工号）是？" value="您的学号（或工号）是？"></el-option>
+		    </el-select>
+		    </el-col>
+		  </el-form-item>
+		  <el-form-item label="答案2" prop="answer2" :rules="[
+           { required: true, message: '请回答密保问题2！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+		  <el-col :span="12">
+		    <el-input v-model="DataForm.answer2" placeholder="答案2"></el-input>
+		    </el-col>
+		  </el-form-item>
+		  <br>
+		  <el-form-item>
+		    <el-button type="primary" @click="submitForm('DataForm')" style="margin-left: 480px;">验证密保</el-button>
+		  </el-form-item>
+		</el-form>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#div",
+	data:{
+		err:"",
+		DataForm:{
+			security1:"",
+			security2:"",
+			answer1:"",
+			answer2:"",
+		}
+	},
+	methods:{
+			submitForm:function(DataForm){
+                var that = this;
+                this.$refs[DataForm].validate((valid) => {
+                    if (valid) {
+						var that = this;
+						axios.post("/findUserbyQ","security1="+that.DataForm.security1+"&answer1="+that.DataForm.answer1+"&security2="+that.DataForm.security2+"&answer2="+that.DataForm.answer2)
+								.then(function(response){
+									if(response.data == true){
+										location.href="/newPwd";
+									}else{
+										that.err=response.data;
+									}
+								},function(err){
+									alert(err);
+								});
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+	}
+})
+</script>
+</html>

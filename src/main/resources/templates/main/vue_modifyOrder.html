@@ -1,0 +1,236 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<style type="text/css">
+	#page{
+		margin-top: 20px; 
+		float: left;
+		width: 100%;
+		height: 50px;
+		text-align: center;
+	}
+	</style>
+</head>
+<body>
+	<div id="app">
+	{{getm()}}
+<el-table :data="tableData" @row-click="clickRow"  @selection-change="handleSelectionChange">
+      	<el-table-column prop="cname" label="收货人" width="100">
+        </el-table-column>
+        <el-table-column prop="cphone" label="联系电话" width="200">
+        </el-table-column>
+        <el-table-column prop="caddress" label="收货地址" width="450">
+        </el-table-column>
+        <el-table-column prop="otype" label="服务类型" >
+        </el-table-column>
+        <el-table-column prop="items" label="寄存物品" >
+        </el-table-column>
+        <el-table-column label="状态" width="180">
+        	<template slot-scope="scope">
+        	<i class="el-icon-circle-close" style="font-size: 20px;"></i>待更正 
+        	<el-button type="warning" icon="el-icon-s-tools" circle @click="editC(scope.row)" ></el-button>
+        	</template>
+        </el-table-column>
+      </el-table>
+		<el-dialog title="更正订单" :visible.sync="dialogorder" width="600px" height="400px">
+
+			<el-form :model="orderForm" status-icon  ref="orderForm" size="medium" label-width="100px" :label-position="left" style="margin-top: 20px;">
+		<el-form-item label="收货人" prop="cname" :rules="[
+           { required: true, message: '收货人不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+         <el-col :span="10">
+          <el-input  clearable placeholder="请输入收货人" v-model="orderForm.cname" ></el-input>
+         </el-col>
+        </el-form-item>
+        <el-form-item label="联系电话" prop="cphone" :rules="[
+          { required: true, message: '联系电话不能为空！', trigger: 'blur' },
+          { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'},
+          { pattern: /^[1][3|5|7|8|9][0-9]+$/, message: '手机号格式错误'}
+          ]">
+         <el-col :span="10">
+          <el-input  clearable placeholder="请输入联系电话" v-model="orderForm.cphone" ></el-input>
+         </el-col>
+        </el-form-item>
+        <el-form-item label="收货区域" prop="ccity" :rules="[
+           { required: true, message: '收货区域不能为空！', trigger: 'blur' },]">
+			<el-col :span="16">
+			<el-cascader :options="options" clearable v-model="orderForm.ccity" ref="ccity"></el-cascader>
+			</el-col>
+			</el-form-item>
+			<el-form-item label="收货地址" prop="caddress" :rules="[
+           { required: true, message: '收货地址不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+			<el-col :span="20">
+			<el-input clearable placeholder="请输入收货地址" v-model="orderForm.caddress" autocomplete="off" ref="caddress"></el-input>
+			</el-col>
+		</el-form-item>
+		<el-form-item label="备注" prop="cmessage"> 
+          <el-col :span="16">
+            <el-input
+			  type="textarea"
+			  autosize
+			  placeholder="请输入备注"
+			  v-model="orderForm.cmessage">
+			</el-input>
+          </el-col>
+
+		</el-form-item>
+		<el-form-item label="上门配送" prop="cgive">
+		  	<el-switch v-model="orderForm.cgive" active-color="#E6A23C" active-value="1" inactive-value="0" @change='changeStatus($event,orderForm.cgive)'></el-switch>
+		</el-form-item>
+		<el-form-item label="配送时间" prop="ctime" >
+			<el-col :span="16">
+			  	<el-date-picker
+			      v-model="orderForm.ctime"
+			      type="datetimerange"
+			      start-placeholder="开始日期"
+			      end-placeholder="结束日期"
+			      :default-time="['12:00:00']"
+			      :disabled="disabled">
+			    </el-date-picker>
+			</el-col>
+		</el-form-item>
+		<el-form-item label="上传文件" >
+           <el-upload
+			  drag
+			  action="https://jsonplaceholder.typicode.com/posts/"
+			  multiple
+			  :limit=limitNum
+			  list-type="picture"
+			  :auto-upload="false"
+        	  :on-exceed="handleExceed"  
+              :before-upload="handleBeforeUpload"
+              :on-preview="handlePictureCardPreview"
+              :on-remove="handleRemove"
+			  >
+			  <i class="el-icon-upload"></i>
+			  <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+			</el-upload>
+     	</el-form-item>
+        <el-form-item>
+           	<el-button type="success" @click="addO('orderForm')" style="float: right; margin-right: 10px;">添加</el-button>
+     	</el-form-item>
+       </el-form>
+		</el-dialog>
+		<el-dialog  title="查看大图" :visible.sync="dialogimg" width="500px" height="400px">
+			<el-image style="width: 400px; height: 400px; margin-left:20px" :src="dialogImageUrl" ></el-image>
+      	</el-dialog>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#app",
+	data:{
+		tableData:[
+		{
+			oid:"",
+			cid:"",
+			cname:"",
+			cphone:"",
+			ccity:"",
+			caddress:"",
+			otype:"",
+			items:"",
+			cmesssage:"",
+		}
+		],
+		 orderForm:{
+		 	cname:"",
+		 	cphone:"",
+		 	caddress:"",
+		 	ccity:[],
+		 	cgive:"",
+		 	cmessage:"",
+		 },
+		options: [],
+		pageSize:"5",//一页显示数量
+		pageNum:"1",//当前页码
+		pages:[],//总共页数
+		pageFirst:"",//首页
+		pageLast:"",//尾页
+		dialogorder:false,
+		dialogimg:false,
+		disabled:true,//判断是否开启配送
+		flagm:true,
+	},
+	methods:{
+		getm(){
+			var that =this;
+			if(that.flagm){
+				axios.post("/modifyunOrder")
+						.then(function (response) {
+							that.tableData = response.data;
+							that.flagm = false;
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		editC(row){
+			var that = this;
+		 	that.dialogorder = true;
+		 	that.orderForm.cname = row.cname;
+		 	that.orderForm.cphone = row.cphone;
+		 	that.orderForm.caddress = row.caddress;
+			that.orderForm.ccity = row.ccity.split(",");
+		 	that.orderForm.cmessage = row.cmessage;
+		 	//alert(row.ccity+"__"+that.orderForm.ccity[0]);
+		},
+		changeStatus($event,num){
+			var that = this;
+			if(num==1){
+				that.disabled = false;
+			}else{
+				that.disabled = true;
+			}
+		},
+		// 上传文件之前的钩子
+    handleBeforeUpload(file){
+    
+      if(!(file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/jpg' || file.type === 'image/jpeg')) {
+        this.$notify.warning({
+          title: '警告',
+          message: '请上传格式为image/png, image/gif, image/jpg, image/jpeg的图片'
+        })
+      }
+      alert(file.size);
+      let size = file.size / 1024 / 1024 / 2
+		alert(size);
+      if(size > 2) {
+        this.$notify.warning({
+          title: '警告',
+          message: '图片大小必须小于2M'
+        })
+      }
+    },
+    // 文件超出个数限制时的钩子
+    handleExceed(files, fileList) {
+    	alert("超出数量！");
+    },
+    // 文件列表移除文件时的钩子
+    handleRemove(file, fileList) {
+      //console.log(file, fileList);
+    },
+    // 点击文件列表中已上传的文件时的钩子
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+     this.dialogimg = true;
+    },
+    uploadFile() {
+      this.$refs.upload.submit();
+
+    },
+	}
+})
+</script>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>管理仓库</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+    <script type="text/javascript" src="../js/man_add.js"></script>
+	<style type="text/css">
+	#order1{
+		width: 1050px;
+		height: 500px;
+		background-color: #E6A23C;
+		border-radius: 30px;
+	}
+	#order2{
+		float: left;
+		width: 1000px;
+		height: 450px;
+		background-color: #E9EEF3;
+		border-radius: 20px;
+		margin-left: 25px;
+		margin-top: 25px; 
+	}
+	#page{
+		margin-top: 20px; 
+		float: left;
+		width: 100%;
+		height: 50px;
+		text-align: center;
+	}
+	#mapp{
+		width: 100px;
+		height: 100px;
+		float: left;
+		background-color: yellow;
+		display: none;
+	}
+	</style>
+</head>
+<body>
+	<div id="div">
+	<div id="order1">
+		{{getorder()}}
+	<div id="order2">
+	  <el-table :data="oData" @row-click="clickRow"  @selection-change="handleSelectionChange" style="border-radius: 20px;">
+      	<el-table-column prop="oid" label="订单号" width="300">
+        </el-table-column>
+        <el-table-column prop="status" label="订单进度" width="200">
+        </el-table-column>
+        <el-table-column prop="audit" label="订单状态" width="200">
+        </el-table-column>
+        <el-table-column prop="items" label="物品名称" width="200">
+        </el-table-column>
+        <el-table-column label="操作" width="100">
+        	<template slot-scope="scope">
+        	 <el-button type="warning" @click="showorder(scope.row)" >查看</el-button>
+  	 	 	</template>
+        </el-table-column>
+      </el-table>
+      <div id="page">
+		<el-button-group >
+ 		 <el-button type="primary" icon="el-icon-arrow" @click="getFirst">首页</el-button>
+ 	  </el-button-group>
+      <el-button-group v-for="page in pages" :key="page">
+ 		  <el-button type="primary" icon="el-icon-arrow" @click="getListPage(page)" >{{page}}页</el-button>
+ 		</el-button-group>
+ 		<el-button-group >
+  		<el-button type="primary" icon="el-icon-arrow-rihgt" @click="getLast">尾页</el-button>
+  		</el-button-group>
+		</div>
+    </div>
+    </div>
+    <el-dialog title="订单详情" :visible.sync="dialogorder" width="500px" height="800px">
+		<el-form :model="form" status-icon  ref="form" size="medium" label-width="100px" style="">
+      	<span style="color: #F56C6C; font-size: 10px; margin-left: 100px;" >{{err}}</span>
+      	<el-form-item label="发件人" :label-width="formLabelWidth" prop="uname" :rules="[
+           { required: true, message: '发件人不能为空！', trigger: 'blur' },]">
+			<el-col :span="12">
+			<el-input clearable v-model="form.uname" ref="uname'"></el-input>
+			</el-col>
+		 </el-form-item>
+		 <el-form-item label="发件人电话" :label-width="formLabelWidth" prop="uphone" :rules="[
+           { required: true, message: '电话不能为空！', trigger: 'blur' },]">
+			<el-col :span="12">
+			<el-input clearable v-model="form.uphone" ref="uphone'"></el-input>
+			</el-col>
+		 </el-form-item>
+		 <el-form-item label="收件人" :label-width="formLabelWidth" prop="cname" :rules="[
+           { required: true, message: '发件人不能为空！', trigger: 'blur' },]">
+			<el-col :span="12">
+			<el-input  clearable v-model="form.cname" ref="cname'"></el-input>
+			</el-col>
+		 </el-form-item>
+		 <el-form-item label="收件人电话" :label-width="formLabelWidth" prop="cphone" :rules="[
+           { required: true, message: '电话不能为空！', trigger: 'blur' },]">
+			<el-col :span="12">
+			<el-input clearable v-model="form.cphone" ref="cphone'"></el-input>
+			</el-col>
+		 </el-form-item>
+          <el-form-item label="收件人地址" :label-width="formLabelWidth" prop="caddress" :rules="[
+           { required: true, message: '仓库地址不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]" >
+          <el-col :span="20">
+          <el-input  clearable placeholder="请输入仓库地址" v-model="form.caddress" ref="caddress" ></el-input>
+          </el-col>
+         </el-form-item>
+         <el-form-item label="订单进度" :label-width="formLabelWidth" prop="status" :rules="[
+           { required: true, message: '进度人不能为空！', trigger: 'blur' },]">
+			 <el-col :span="10">
+				 <el-select v-model="form.status" placeholder="请选择">
+					 <el-option
+							 v-for="item in options1"
+							 :key="item.value"
+							 :label="item.label"
+							 :value="item.value">
+					 </el-option>
+				 </el-select>
+			 </el-col>
+		 </el-form-item>
+		 <el-form-item label="订单状态" :label-width="formLabelWidth" prop="audit" :rules="[
+           { required: true, message: '状态不能为空！', trigger: 'blur' },]">
+			 <el-col :span="10">
+				 <el-select v-model="form.audit" placeholder="请选择">
+					 <el-option
+							 v-for="items in options2"
+							 :key="items.value"
+							 :label="items.label"
+							 :value="items.value">
+					 </el-option>
+				 </el-select>
+			 </el-col>
+		 </el-form-item>
+		<el-form-item >
+					<el-image style="width: 100px; height: 100px" :src="dialogImageUrl1" :fit="cover" @click="getimg(dialogImageUrl1)"></el-image>
+					<el-image style="width: 100px; height: 100px" :src="dialogImageUrl2" :fit="cover" @click="getimg(dialogImageUrl2)"></el-image>
+					<el-image style="width: 100px; height: 100px" :src="dialogImageUrl3" :fit="cover" @click="getimg(dialogImageUrl3)"></el-image>
+				</el-form-item>
+         <el-form-item>
+           <el-button type="success" @click="modifyo('form')" style="float: right; margin-right: 10px;">完成</el-button>
+     	 </el-form-item>
+       </el-form>
+    </el-dialog>
+     <el-dialog title="大图" :visible.sync="dialogimg" width="700px" height="400px">
+			<el-image style="width: 600px; height: 400px" :src="dialogImageUrl" ></el-image>
+		</el-dialog>
+    <div id="mapp">
+
+		</div>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#div",
+	data:{
+		 oData:[
+		 {
+		 	oid:"",
+			uid:"",
+			wid:"",
+			cid:"",
+		 	hid:"",
+			starttime:"",
+			endtime:"",
+			status:"",
+			audit:"",
+			items:"",
+			items_img:"",
+			otype:"",
+			cmessage:"",
+		 }
+		 ],
+		 form:{
+		 	uname:"",
+			uphone:"",
+			cname:"",
+			cphone:"",
+			caddress:"",
+			 oid:"",
+			 uid:"",
+			 wid:"",
+			 cid:"",
+			 hid:"",
+			 starttime:"",
+			 endtime:"",
+			 status:"",
+			 audit:"",
+			 items:"",
+			 items_img:"",
+			 otype:"",
+			 cmessage:"",
+		 },
+		 options1:[{
+		 	 value: '1',
+             label: '完成'
+        }, {
+          value: '0',
+          label: '未完成'
+     
+		 }],
+		options2:[{
+			value: '1',
+			label: '未通过审核'
+		}, {
+			value: '0',
+			label: '正在审核中'
+
+		}],
+		formLabelWidth:'100px',
+		pageSize:"5",//一页显示数量
+		pageNum:"1",//当前页码
+		pages:[],//总共页数
+		pageFirst:"",//首页
+		pageLast:"",//尾页
+		flag1:true,//获取order集合
+		dialogorder:false,//修改订单状态
+		dialogImageUrl1:"./img/4.jpg",
+		dialogImageUrl2:"./img/5.jpg",
+		dialogImageUrl3:"./img/6.jpg",
+		dialogimg:false,
+		dialogImageUrl:"",
+		quanxian:true,//true表示管理员，false表示员工
+	},
+	methods:{
+		getorder(){
+			var that = this;
+			if(this.flag1){
+				axios.post("/checkadmin")
+						.then(function (response) {
+							if(response.data=="管理"){
+								that.getallorder();
+								that.quanxian = true;
+							}else{
+								that.getsingleorder();
+								that.quanxian = false;
+							}
+							that.flag1 = false;
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		getallorder(){
+			var that = this;
+				axios.post("/showallOrder","pageNum="+that.pageNum+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.flag1 = false;
+								that.oData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								for(let i=0;i<that.oData.length;i++){
+									if(that.oData[i].status=="0"){
+										that.oData[i].status="未完成";
+									}else {
+										that.oData[i].status="完成";
+									}
+
+									if(that.oData[i].audit=="0"){
+										that.oData[i].audit="正在审核中";
+									}else {
+										that.oData[i].audit="未通过审核";
+									}
+								}
+							}
+						}, function (err) {
+							alert(err);
+						});
+		},
+		getsingleorder(){
+			var that = this;
+			axios.post("/showsingleOrder","pageNum="+that.pageNum+"&pageSize="+that.pageSize)
+					.then(function (response) {
+						if(response.data!=null){
+							that.flag1 = false;
+							that.oData = response.data.list;
+							that.pages = response.data.navigatepageNums;
+							that.pageFirst = response.data.navigateFirstPage;
+							that.pageLast = response.data.navigateLastPage;
+							for(let i=0;i<that.oData.length;i++){
+								if(that.oData[i].status=="0"){
+									that.oData[i].status="未完成";
+								}else {
+									that.oData[i].status="完成";
+								}
+
+								if(that.oData[i].audit=="0"){
+									that.oData[i].audit="正在审核中";
+								}else {
+									that.oData[i].audit="未通过审核";
+								}
+							}
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+		getuid(uid,cid){
+			var uid = uid;
+			var cid = cid;
+			var that = this;
+			axios.post("/getuidandcid","uid="+uid+"&cid="+cid)
+					.then(function (response) {
+						that.form.uname = response.data.uname;
+						that.form.uphone = response.data.uphone;
+						that.form.cname = response.data.cname;
+						that.form.cphone = response.data.cphone;
+						that.form.caddress = response.data.caddress;
+					}, function (err) {
+						alert(err);
+					});
+		},
+		showorder(row){
+			var that = this;
+			this.dialogorder = true;
+			this.getuid(row.uid,row.cid);
+			this.form.oid = row.oid;
+			this.form.uid = row.uid;
+			this.form.cid = row.cid;
+			this.form.hid = row.hid;
+			this.form.wid = row.wid;
+			this.form.starttime = row.starttime;
+			this.form.items = row.items;
+			this.form.items_img = row.items_img;
+			this.form.otype = row.otype;
+			this.form.cmessage = row.cmessage;
+
+			if(row.status=="未完成"){
+				that.form.status ="0";
+			}else {
+				that.form.status ="1";
+			}
+			if(row.audit=="正在审核中"){
+				that.form.audit ="0";
+			}else {
+				that.form.audit ="1";
+			};
+			var imgs = row.items_img.split(",");
+			this.dialogImageUrl1 = "../items_img/"+imgs[0];
+			this.dialogImageUrl2 = "../items_img/"+imgs[1];
+			this.dialogImageUrl3 = "../items_img/"+imgs[2];
+		},
+		getimg(img){
+			var img =img;
+			this.dialogImageUrl=img;
+			this.dialogimg=true;
+		},
+		modifyo(form){
+			var that = this;
+ 			this.$refs[form].validate((valid) => {
+	          if (valid) {
+				  axios.post("/modorder","oid="+that.form.oid+"&uid="+that.form.uid+"&cid="+that.form.cid+"&wid="+that.form.wid+"&hid="+that.form.hid+"&items="+that.form.items+"&items_img="+that.form.items_img+"&otype="+that.form.otype+"&cmessage="+that.form.cmessage+"&status="+that.form.status+"&audit="+that.form.audit+"&pageNum="+that.pageFirst+"&pageSize="+that.pageSize)
+						  .then(function (response) {
+							  if(response.data!=null){
+								  that.oData = response.data.list;
+								  that.pages = response.data.navigatepageNums;
+								  that.pageFirst = response.data.navigateFirstPage;
+								  that.pageLast = response.data.navigateLastPage;
+								  that.$message({
+									  type: 'success',
+									  message: '审核完成!'
+								  });
+								  for(let i=0;i<that.oData.length;i++){
+									  if(that.oData[i].status=="0"){
+										  that.oData[i].status="未完成";
+									  }else {
+										  that.oData[i].status="完成";
+									  }
+
+									  if(that.oData[i].audit=="0"){
+										  that.oData[i].audit="正在审核中";
+									  }else {
+										  that.oData[i].audit="未通过审核";
+									  }
+
+								  }
+							  }
+						  }, function (err) {
+							  alert(err);
+						  });
+				  that.dialogorder = false;
+	          } else {
+	            console.log('error submit!!');
+	            return false;
+	          }
+	        });
+		},
+		getListPage(page){
+			var that = this;
+			var page = page;
+			if(this.quanxian){
+				axios.post("/showallOrder","pageNum="+page+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.oData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								for(let i=0;i<that.oData.length;i++){
+									if(that.oData[i].status=="0"){
+										that.oData[i].status="未完成";
+									}else {
+										that.oData[i].status="完成";
+									}
+
+									if(that.oData[i].audit=="0"){
+										that.oData[i].audit="正在审核中";
+									}else {
+										that.oData[i].audit="未通过审核";
+									}
+								}
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}else {
+				axios.post("/showsingleOrder","pageNum="+page+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.oData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								for(let i=0;i<that.oData.length;i++){
+									if(that.oData[i].status=="0"){
+										that.oData[i].status="未完成";
+									}else {
+										that.oData[i].status="完成";
+									}
+
+									if(that.oData[i].audit=="0"){
+										that.oData[i].audit="正在审核中";
+									}else {
+										that.oData[i].audit="未通过审核";
+									}
+								}
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}
+
+		},
+		getFirst(){
+			var that = this;
+			if(this.quanxian){
+				axios.post("/showallOrder","pageNum="+that.pageFirst+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.oData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								for(let i=0;i<that.oData.length;i++){
+									if(that.oData[i].status=="0"){
+										that.oData[i].status="未完成";
+									}else {
+										that.oData[i].status="完成";
+									}
+
+									if(that.oData[i].audit=="0"){
+										that.oData[i].audit="正在审核中";
+									}else {
+										that.oData[i].audit="未通过审核";
+									}
+								}
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}else {
+				axios.post("/showsingleOrder","pageNum="+that.pageFirst+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.oData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								for(let i=0;i<that.oData.length;i++){
+									if(that.oData[i].status=="0"){
+										that.oData[i].status="未完成";
+									}else {
+										that.oData[i].status="完成";
+									}
+
+									if(that.oData[i].audit=="0"){
+										that.oData[i].audit="正在审核中";
+									}else {
+										that.oData[i].audit="未通过审核";
+									}
+								}
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}
+
+		},
+		getLast(){
+			var that = this;
+			if(this.quanxian){
+				axios.post("/showallOrder","pageNum="+that.pageLast+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.oData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								for(let i=0;i<that.oData.length;i++){
+									if(that.oData[i].status=="0"){
+										that.oData[i].status="未完成";
+									}else {
+										that.oData[i].status="完成";
+									}
+
+									if(that.oData[i].audit=="0"){
+										that.oData[i].audit="正在审核中";
+									}else {
+										that.oData[i].audit="未通过审核";
+									}
+								}
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}else {
+				axios.post("/showsingleOrder","pageNum="+that.pageLast+"&pageSize="+that.pageSize)
+						.then(function (response) {
+							if(response.data!=null){
+								that.oData = response.data.list;
+								that.pages = response.data.navigatepageNums;
+								that.pageFirst = response.data.navigateFirstPage;
+								that.pageLast = response.data.navigateLastPage;
+								for(let i=0;i<that.oData.length;i++){
+									if(that.oData[i].status=="0"){
+										that.oData[i].status="未完成";
+									}else {
+										that.oData[i].status="完成";
+									}
+
+									if(that.oData[i].audit=="0"){
+										that.oData[i].audit="正在审核中";
+									}else {
+										that.oData[i].audit="未通过审核";
+									}
+								}
+							}
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+
+	}
+})
+</script>
+</html>

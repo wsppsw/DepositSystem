@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>哪都通后台登录</title>
+    <link rel="shortcut icon" href="./img_head/ico/ico.ico" type="image/x-icon">
+    <script type="text/javascript" src="./js/vue.js"></script>
+    <link rel="stylesheet" type="text/css" href="./element-ui/lib/theme-chalk/index.css">
+    <script type="text/javascript" src="./element-ui/lib/index.js"></script>
+    <script type="text/javascript" src="./js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="./js/axios.js"></script>
+    <style type="text/css">
+        .el-header,.el-footer {
+            background-color: #E6A23C;
+            width: 100%;
+        }
+        .el-main{
+            background-color: white;
+            width: 100%;
+            height: 500px;
+        }
+        .el-footer p{
+            text-align: center;
+        }
+        .el-form{
+            margin-left: 50px;
+        }
+        #div1{
+            margin: 0 auto;
+            margin-top: 50px;
+            width: 500px;
+            height: 200px;
+            background-color: #DCDFE6;
+            border-radius: 30px;
+        }
+    </style>
+
+</head>
+<body>
+<div id="div">
+    {{created()}}
+    <el-container>
+        <el-header>
+            <el-image
+                    style="width: 100px; height: 60px; float: left; margin-left: -20px;"
+                    :src="logo"
+                    :fit="none"></el-image>
+            <p style="color: white; float: left; margin-left: 10px;">哪都通后台管理</p>
+        </el-header>
+        <el-main>
+            <div id="div1">
+                <el-form :model="loginForm" status-icon  ref="loginForm" size="medium" label-width="100px" style="">
+                    <span style="color: #F56C6C; font-size: 10px; margin-left: 100px;" >{{err}}</span>
+                    <el-form-item label="账号/手机号" prop="username" :rules="[
+           { required: true, message: '用户号不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]" >
+                        <el-col :span="15">
+                            <el-input   clearable placeholder="请输入用户名或手机号" v-model="loginForm.username" ref="uname"></el-input>
+                        </el-col>
+                    </el-form-item>
+
+                    <el-form-item label="密码" prop="password" :rules="[
+          { required: true, message: '密码不能为空！', trigger: 'blur' },
+          { min: 6, message: '密码不少于6个长度', trigger: 'blur'}
+         ]">
+                        <el-col :span="15">
+                            <el-input  type="password" clearable placeholder="请输入密码" v-model="loginForm.password" @keyup.13="submitForm('loginForm')" ref="upwd"></el-input>
+                        </el-col>
+                    </el-form-item>
+                    <el-form-item>
+                        <el-button  type="primary"  @click="submitForm('loginForm')" >登录</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </el-main>
+        <el-footer>
+            <p style="color: white;">@Copyright 2021 - 2022 侵权必究</p>
+        </el-footer>
+    </el-container>
+</div>
+</body>
+<script type="text/javascript">
+    new Vue({
+        el:"#div",
+        data:{
+            logo:"img_head/ico/logo.jpg",
+            err:"",//用户名登录报错
+            loginForm:{
+                username:"",
+                password:"",
+            },
+
+        },
+        methods:{
+            //键盘登录
+            created(){
+                var that = this;
+                document.onkeydown = function(e){
+                    var key = window.event.keyCode;
+                    if(key == 13){
+                        that.submitForm('loginForm');
+                    }
+                }
+            },
+            //登录
+            submitForm:function(loginForm){
+                var that = this;
+                this.$refs[loginForm].validate((valid) => {
+                    if (valid) {
+                        axios.post("loginmanagement","username="+that.loginForm.username+"&password="+that.loginForm.password)
+                         .then(function(response){
+                            if(response.data=="管理"){
+                                that.err="";
+                                location.href="/management/admin";
+                            }else if(response.data=="服务"){
+                                that.err="";
+                                location.href="/management/serviceworker";
+                            }else {
+                                that.$refs.uname.focus();
+                                that.loginForm.username="";
+                                that.loginForm.password="";
+                                that.err = response.data;
+                            }
+                         },function(err){
+
+                         });
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+
+        },
+    })
+</script>
+
+</html>

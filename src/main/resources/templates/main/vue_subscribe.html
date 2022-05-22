@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>预约订单</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw"></script>  
+    <script src="http://cdn.bootcss.com/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/cmap.js"></script>
+	<style type="text/css">
+	#div{
+		overflow-x: auto;
+	}
+	#order1{
+		float: left;
+		width: 550px;
+		height: 500px;
+		background-color: #E6A23C;
+		border-radius: 30px;
+		margin-left: 10px;
+	}
+	#order2{
+		float: left;
+		width: 500px;
+		height: 450px;
+		background-color: #E9EEF3;
+		border-radius: 20px;
+		margin-left: 25px;
+		margin-top: 25px;
+		overflow-y:auto;
+		z-index: 2;
+	}
+	#cmap{
+		float: left;
+		margin-left: 10px;
+		width: 500px;
+		height: 500px;
+		border-radius: 20px;
+		z-index: 2;
+	}
+	#btn{
+		
+		position: absolute;
+		right:100px;
+	}
+	#shownewmap{
+		margin-top: 10px;
+	}
+	</style>
+</head>
+<body>
+	<div id="div" v-loading.fullscreen.lock="fullscreenLoading">
+		{{openFullScreen()}}
+		<!--{{getcityData()}} -->
+	   <div id="order1">
+	   <div id="order2">
+	   <el-form :model="orderForm" status-icon  ref="orderForm" size="medium" label-width="100px" :label-position="left" style="margin-top: 20px;">
+		<el-form-item label="收货人" prop="cname" :rules="[
+           { required: true, message: '收货人不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+         <el-col :span="10">
+          <el-input  clearable placeholder="请输入收货人" v-model="orderForm.cname" ></el-input>
+         </el-col>
+			<el-button type="primary" size="mini" style="margin-left:10px;" @click="show">选择收货地址</el-button>
+        </el-form-item>
+        <el-form-item label="联系电话" prop="cphone" :rules="[
+          { required: true, message: '联系电话不能为空！', trigger: 'blur' },
+          { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'},
+          { pattern: /^[1][3|5|7|8|9][0-9]+$/, message: '手机号格式错误'}
+          ]">
+         <el-col :span="10">
+          <el-input  clearable placeholder="请输入联系电话" v-model="orderForm.cphone" ></el-input>
+         </el-col>
+        </el-form-item>
+        <el-form-item label="收货区域" prop="ccity" :rules="[
+           { required: true, message: '收货区域不能为空！', trigger: 'blur' },]">
+			<el-col :span="16">
+			<el-cascader :options="options" clearable v-model="orderForm.ccity" ref="ccity"></el-cascader>
+			</el-col>
+			</el-form-item>
+			<el-form-item label="收货地址" prop="caddress" :rules="[
+           { required: true, message: '收货地址不能为空！', trigger: 'blur' },
+           { pattern: /^[A-Za-z0-9\u4e00-\u9fa5]+$/, message: '不允许输入空格等特殊符号'}
+          ]">
+			<el-col :span="20">
+			<el-input clearable placeholder="请输入收货地址" v-model="orderForm.caddress" autocomplete="off" ref="caddress"></el-input>
+			</el-col>
+		</el-form-item>
+		   <el-form-item label="物品形式" prop="items" :rules="[
+           { required: true, message: '物品形式不能为空！', trigger: 'blur' },]">
+			   <el-col :span="16">
+				   <el-select v-model="orderForm.items" placeholder="请选择">
+					   <el-option
+							   v-for="item in opt"
+							   :key="item.value"
+							   :label="item.label"
+							   :value="item.value">
+					   </el-option>
+				   </el-select>
+			   </el-col>
+		   </el-form-item>
+		<el-form-item label="备注" prop="cmessage"> 
+          <el-col :span="16">
+            <el-input
+			  type="textarea"
+			  autosize
+			  placeholder="请输入备注"
+			  v-model="orderForm.cmessage">
+			</el-input>
+          </el-col>
+
+		</el-form-item>
+		<el-form-item label="上门配送" prop="cgive">
+		  	<el-switch v-model="orderForm.cgive" active-color="#E6A23C" active-value="1" inactive-value="0" @change='changeStatus($event,orderForm.cgive)'></el-switch>
+		</el-form-item>
+		<el-form-item label="配送时间" prop="ctime" >
+			<el-col :span="16">
+			  	<el-date-picker
+			      v-model="orderForm.ctime"
+			      type="datetimerange"
+			      start-placeholder="开始日期"
+			      end-placeholder="结束日期"
+			      :default-time="['12:00:00']"
+			      :disabled="disabled">
+			    </el-date-picker>
+			</el-col>
+		</el-form-item>
+		<el-form-item label="上传文件" prop="cgive">
+           <el-upload
+			  drag
+			  ref="upload"
+			  action="/fileupitems"
+			  multiple
+			  :limit=limitNum
+			  list-type="picture"
+			  :auto-upload="false"
+        	  :on-exceed="handleExceed"  
+              :before-upload="handleBeforeUpload"
+              :on-preview="handlePictureCardPreview"
+              :on-remove="handleRemove"
+			  >
+			  <i class="el-icon-upload"></i>
+			  <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+			</el-upload>
+     	</el-form-item>
+        <el-form-item>
+           	<el-button type="success" @click="addO('orderForm')" style="float: right; margin-right: 10px;">添加</el-button>
+     	</el-form-item>
+       </el-form>
+      	<el-dialog  title="查看大图" :visible.sync="dialogimg" width="500px" height="400px">
+			<el-image style="width: 400px; height: 400px; margin-left:20px" :src="dialogImageUrl" ></el-image>
+      	</el-dialog>
+       </div>
+       </div>
+       <div id="cmap">
+			
+       </div>
+		<input type="hidden" clearable placeholder="请输入用户名" v-model="address_" id="address"></input>
+		<input type="hidden" clearable placeholder="请输入用户名" v-model="coor" id="zuobiao"></input>
+		<input type="hidden" clearable placeholder="请输入用户名" v-model="scity" id="scity"></input>
+		<div id="btn">
+			<el-button id="path" type="success" round @click="showtag">路线</el-button></br>
+		   <el-button type="success" round @click="warehouses" style="float: left; margin-top: 10px;">仓库</el-button></br>
+		   <el-button type="success" :style="{ display: visibleLine }" id="shownewmap" size="mini" @click="close">查看选择后的仓库</el-button>
+       </div>
+
+		<el-dialog  title="选择收货地址" :visible.sync="dialogaddress" width="1000px" >
+			<el-table :data="consigneeData" @row-click="clickRow"  @selection-change="handleSelectionChange" height="300">
+				<el-table-column prop="cname" label="收货人" width="100">
+				</el-table-column>
+				<el-table-column prop="cphone" label="联系电话" width="200">
+				</el-table-column>
+				<el-table-column prop="caddress" label="收货地址" width="550">
+				</el-table-column>
+				<el-table-column label="操作" width="100">
+					<template slot-scope="scope">
+						<el-button type="warning" @click="select(scope.row)" >选择</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</el-dialog>
+
+		<el-dialog  title="查看仓库" :visible.sync="dialogwarehouse" width="1000px" >
+			<el-table :data="warehouse" @row-click="clickRow"  @selection-change="handleSelectionChange" height="300">
+				<el-table-column prop="city" label="所属区域" width="100">
+				</el-table-column>
+				<el-table-column prop="hsize" label="仓库大小" width="200">
+				</el-table-column>
+				<el-table-column prop="address" label="仓库地址" width="550">
+				</el-table-column>
+				<el-table-column label="操作" width="100">
+					<template slot-scope="scope">
+						<el-button  type="warning" @click="selectwarehouse(scope.row)">选择</el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+		</el-dialog>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#div",
+	data:{
+		consigneeData:[{
+			cid:"",
+			cname:"",
+			cphone:"",
+			caddress:"",
+			ccity:"",
+		}],
+		 orderForm:{
+			cid:"",
+		 	cname:"",
+		 	cphone:"",
+		 	caddress:"",
+		 	ccity:[],
+		 	cgive:"",
+		 	cmessage:"",
+			items:"",
+		 },
+		opt:[{
+			value: '实体',
+			label: '实体'
+		}, {
+			value: '虚拟',
+			label: '虚拟'
+
+		}],
+		warehouse:[
+			{
+				hid:"1",
+				address:"河北省邯郸市武安市活水乡七步沟村",
+				city:"",
+				coordinate:"113.881628,36.938712",
+				hsize:"100.00",
+			}
+		],
+		address_:"北京市昌平区天通苑",
+		coor:"116.419451,40.080461",
+		scity:"昌平区",
+		hhid:"2",
+		visibleLine:"none",
+        disabled:true,//判断是否开启配送
+        dialogmap:false,//推荐路线
+        limitNum: 3,
+        dialogimg:false,
+        dialogImageUrl:"",
+		fullscreenLoading:true,//加载
+		flagg:true,
+		dialogaddress:false,
+		dialogwarehouse:false,
+		flaghave:false,//判断是否使用收货地址
+		flagcity:true,
+		options: [],
+	},
+	methods:{
+		openFullScreen() {
+			var that = this;
+			if(this.flagg){
+				this.flagg=false;
+				this.fullscreenLoading = true;
+				this.getonewarehouse();
+				this.getcitydata();
+				setTimeout(() => {
+					this.fullscreenLoading = false;
+				}, 1500);
+			}
+		},
+		showtag(){
+			this.$message({
+				type: 'success',
+				message: '正在为您生成路线推荐，请您稍等。。。'
+			});
+		},
+		getcitydata(){
+			var that = this;
+			axios.post("/getCitys")
+					.then(function (response) {
+						that.options = response.data;
+					}, function (err) {
+						alert(err);
+					});
+		},
+		select(row){
+			this.orderForm.cid = row.cid;
+			this.orderForm.cname = row.cname;
+			this.orderForm.cphone = row.cphone;
+			this.orderForm.ccity = row.ccity.split(",");
+			this.orderForm.caddress = row.caddress;
+			this.dialogaddress = false;
+			this.flaghave = true;
+		},
+		show(){
+			var that = this;
+			axios.post("/getc")
+				.then(function (response) {
+					if(response.data!=null){
+						that.consigneeData = response.data;
+						that.dialogaddress=true;
+					}else {
+						that.dialogaddress=false;
+					}
+					}, function (err) {
+						alert(err);
+					});
+
+		},
+		addO(orderForm){
+			var that = this;
+			this.$refs[orderForm].validate((valid) => {
+	          if (valid) {
+	          	this.uploadFile();
+					if (this.flaghave) {//有收货地址，直接传递cid
+						axios.post("/addOrder", "cid=" + that.orderForm.cid + "&hid=" + that.hhid + "&otype=" + that.orderForm.cgive + "&cmessage=" + that.orderForm.cmessage + "&items=" + that.orderForm.items)
+								.then(function (response) {
+									if (response.data == true) {
+										that.$message({
+											type: 'success',
+											message: '订单预约成功！'
+										});
+									}
+									that.flagcheck = false;
+								}, function (err) {
+									alert(err);
+								});
+					} else {
+						axios.post("/addOrdernocid", "cname=" + that.orderForm.cname + "&cphone=" + that.orderForm.cphone + "&caddress=" + that.orderForm.caddress + "&ccity=" + that.orderForm.ccity + "&hid=" + that.hhid + "&otype=" + that.orderForm.cgive + "&cmessage=" + that.orderForm.cmessage + "&items=" + that.orderForm.items)
+								.then(function (response) {
+									if (response.data == true) {
+										that.$message({
+											type: 'success',
+											message: '订单预约成功！！！'
+										});
+										that.flagcheck = false;
+									}
+								}, function (err) {
+									alert(err);
+								});
+					}
+	          } else {
+	            console.log('error submit!!');
+	            return false;
+	          }
+	        });
+		},
+		changeStatus($event,num){
+			var that = this;
+			if(num==1){
+				that.disabled = false;
+			}else{
+				that.disabled = true;
+			}
+		},
+		// 上传文件之前的钩子
+    handleBeforeUpload(file){
+    
+      if(!(file.type === 'image/png' || file.type === 'image/gif' || file.type === 'image/jpg' || file.type === 'image/jpeg')) {
+        this.$notify.warning({
+          title: '警告',
+          message: '请上传格式为image/png, image/gif, image/jpg, image/jpeg的图片'
+        })
+      }
+      let size = file.size / 1024 / 1024 / 2
+      if(size > 2) {
+        this.$notify.warning({
+          title: '警告',
+          message: '图片大小必须小于2M'
+        })
+      }
+    },
+    // 文件超出个数限制时的钩子
+    handleExceed(files, fileList) {
+    	alert("超出数量！");
+    },
+    // 文件列表移除文件时的钩子
+    handleRemove(file, fileList) {
+      //console.log(file, fileList);
+    },
+    // 点击文件列表中已上传的文件时的钩子
+    handlePictureCardPreview(file) {
+      this.dialogImageUrl = file.url;
+     this.dialogimg = true;
+    },
+    uploadFile() {
+      this.$refs.upload.submit();
+    },
+    close(){
+		this.visibleLine = "none";
+    },
+	getcityData(){
+		var that = this;
+		if(that.flagcity){
+			axios.post("/getCityData")
+					.then(function (response) {
+						that.options = response.data;
+						that.flagcity = false;
+					}, function (err) {
+						alert(err);
+					});
+		}
+	},
+	warehouses(){
+		this.getallwarehouse();
+		this.dialogwarehouse = true;
+	},
+	selectwarehouse(row){
+		this.address_ = row.address;
+		this.coor = row.coordinate;
+		this.scity = row.city.split(",")[1];
+		this.hhid = row.hid;
+		this.visibleLine = "";
+		this.dialogwarehouse = false;
+	},
+	getonewarehouse(){
+		var that = this;
+		axios.post("/placeOnewarehouse")
+				.then(function (response) {
+					that.address_ = response.data.address_;
+					that.coor = response.data.coor;
+					that.scity = response.data.scity;
+					that.hhid = response.data.hhid;
+				}, function (err) {
+					alert(err);
+				});
+	},
+	getallwarehouse(){
+		var that = this;
+		axios.post("/placewarehouse")
+				.then(function (response) {
+					that.warehouse = response.data;
+				}, function (err) {
+					alert(err);
+				});
+	}
+	}
+})
+</script>
+</html>

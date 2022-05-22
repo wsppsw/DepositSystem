@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>哪都通超级管理界面</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<style type="text/css">
+	.el-header,.el-footer {
+     background-color: #E6A23C;
+      width: 100%; 
+   }
+   .el-main{
+    background-color: #F2F6FC;
+    width: 100%;
+    height: 600px;
+   }
+   .el-footer p{
+      text-align: center;
+    }
+    
+	</style>
+</head>
+<body>
+	<div id="main">
+	<el-container>
+	  <el-header>
+	  <el-container>
+		<el-image
+      style="width: 100px; height: 60px; float: left; margin-left: -20px;"
+      :src="logo"
+      :fit="none"></el-image>
+      <p style="color: white; float: left; margin-left: 10px;">哪都通，一个什么都做的神秘机构</p>
+	  <el-menu
+	  :default-active="activeIndex"
+	  mode="horizontal"
+	  @select="handleSelect"
+	  background-color="#E6A23C"
+	  text-color="white"
+	  active-text-color="white"
+	  style="margin-left: auto;">
+		  {{getadmin()}}
+	  <el-menu-item index="1" style="font-size: 18px;" @click="modifyUser">{{username}}</el-menu-item>
+	  <el-menu-item index="2" style="font-size: 18px;" @click="modifyUser"><el-avatar  :size="50" :fit="scale-down" :src="img_head"></el-avatar></el-menu-item>
+	  <el-menu-item index="3" @click="toexit"><el-link :underline="false" target="_self" style="font-size: 18px;">退出</el-link></el-menu-item>
+	</el-menu>
+	</el-container>
+	  </el-header>
+	  <el-container>
+			<el-aside width="initial">
+		<el-menu :default-openeds="[]" class='demo' >
+      <el-submenu index="1">
+        <template slot="title"></template>
+        <el-menu-item-group>
+          <el-menu-item index="1-1" @click="worker" ><i class="el-icon-menu"></i>员工管理</el-menu-item>
+          <el-menu-item index="1-2" @click="warehouse"><i class="el-icon-menu"></i>仓库管理</el-menu-item>
+			<el-menu-item index="1-3" @click="addwarehouse"><i class="el-icon-menu"></i>添加仓库</el-menu-item>
+          <el-menu-item index="1-4" @click="order"><i class="el-icon-menu"></i>订单管理</el-menu-item>
+   
+        </el-menu-item-group>
+      </el-submenu>
+      <el-submenu index="2">
+        <template slot="title"></template>
+        <el-menu-item-group>
+          <el-menu-item index="2-1"  @click="modifyUser"><i class="el-icon-menu"></i>修改信息</el-menu-item>
+          <el-menu-item index="2-2" @click="modifyPwd"><i class="el-icon-menu"></i>修改密码</el-menu-item>
+        </el-menu-item-group>
+      </el-submenu>
+     
+    </el-menu>
+    </el-aside>
+	    <el-main>
+			<iframe :src="Iframe" frameborder="false" style="height: 550px; width: 100%;"></iframe>
+	    </el-main>
+	  </el-container> 
+	  <el-footer>
+	       <p style="color: white;">@Copyright 2021 - 2022 侵权必究</p>
+	  </el-footer>
+	</el-container>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#main",
+	data:{
+		logo:"../img_head/ico/logo.jpg",
+		exit:"退出",
+		img_head:"../img_head/13.jpg",
+		username:"用户",
+		Iframe:"/management/worker",
+		flag:true,
+	},
+	methods:{
+		getadmin(){
+			var that = this;
+			if(that.flag){
+				axios.post("/AlreadyWorkerLogin")
+						.then(function (response) {
+							that.username = response.data.username;
+							that.img_head = "../"+response.data.userhead;
+							that.flag = false;
+						}, function (err) {
+							alert(err);
+						});
+			}
+		},
+		worker(){
+			this.Iframe="/management/worker";
+		},
+		warehouse(){
+			this.Iframe="/management/warehouse";
+		},
+		addwarehouse(){
+			this.Iframe="/management/addwarehouse";
+		},
+		order(){
+			this.Iframe="/management/order";
+		},
+		modifyUser(){
+			this.Iframe="/management/modifyuser";
+		},
+		modifyPwd(){
+			this.Iframe="/management/modifypwd";
+		},
+		toexit(){
+			axios.post("/verifyexit")
+					.then(function (response) {
+						if (response.data != null) {
+							window.location.href="/manlogin";
+						}
+					}, function (err) {
+						alert(err);
+					});
+		},
+	}
+})
+</script>
+</html>

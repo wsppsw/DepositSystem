@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.deposit_system.mapper.CitysMapper">
+    <select id="findCity1" resultType="com.example.deposit_system.entity.Citys">
+        select * from tb_city1
+    </select>
+    <select id="findCity2" resultType="com.example.deposit_system.entity.Citys">
+        select * from tb_city2
+    </select>
+    <select id="findCity3" resultType="com.example.deposit_system.entity.Citys">
+        select * from tb_city3
+    </select>
+    <insert id="addcity1" parameterType="com.example.deposit_system.entity.Citys">
+        insert into tb_city1 values (#{code},#{value},#{label})
+    </insert>
+    <insert id="addcity2" parameterType="com.example.deposit_system.entity.Citys">
+        insert into tb_city2 values (#{code},#{value},#{label})
+    </insert>
+    <insert id="addcity3" parameterType="com.example.deposit_system.entity.Citys">
+        insert into tb_city3 values (#{code},#{value},#{label})
+    </insert>
+</mapper>

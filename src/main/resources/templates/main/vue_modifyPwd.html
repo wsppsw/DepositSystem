@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>修改密码</title>
+	<link rel="shortcut icon" href="../img_head/ico/ico.ico" type="image/x-icon">
+  	<script type="text/javascript" src="../js/vue.js"></script>
+  	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+  	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+ 	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+  	<script type="text/javascript" src="../js/axios.js"></script>
+  	<style type="text/css">
+	#div1{
+		float: left;
+		width: 800px;
+		height: 500px;
+		background-color: #E6A23C;
+		border-radius: 30px;
+		margin-left: 150px;
+	}
+	#div2{
+		float: left;
+		width: 600px;
+		height: 400px;
+		background-color: #E9EEF3;
+		border-radius: 30px;
+		margin-left: 100px;
+		margin-top: 50px; 
+	}
+	.el-form{
+		margin-left: 120px;
+		margin-top: 50px; 
+	}
+  	</style>
+</head>
+<body>
+<div id="modifyPwd">
+	<div id="div1">
+        {{ getUser()}}
+		<div id="div2">
+		<el-form :model="DataForm" status-icon  ref="DataForm" size="medium" label-width="100px" :label-position="left">
+          <el-form-item label="用户名" prop="username" >
+          <el-col :span="10">
+          <el-input  clearable placeholder="请输入用户名" v-model="DataForm.username" :disabled="true"></el-input>
+          </el-col>
+         </el-form-item>
+         <el-form-item label="旧密码" prop="passwd1" :rules="[
+          { required: true, message: '密码不能为空！', trigger: 'blur' },
+          { min: 6, message: '密码不少于6个长度', trigger: 'blur'}
+         ]"> 
+         <el-col :span="10">
+          <el-input  type="password" clearable placeholder="请输入密码" v-model="DataForm.passwd1" ref="pwd1"></el-input>
+          </el-col>
+         </el-form-item>
+         <el-form-item label="新密码" prop="passwd2" :rules="[
+          { required: true, message: '密码不能为空！', trigger: 'blur' },
+          { min: 6, message: '密码不少于6个长度', trigger: 'blur'}
+         ]"> 
+         <el-col :span="10">
+          <el-input  type="password" clearable placeholder="请输入密码" v-model="DataForm.passwd2" ref="pwd2"></el-input>
+          </el-col>
+         </el-form-item>
+		<el-form-item label="确认密码" prop="passwd3" :rules="[
+          { required: true, message: '密码不能为空！', trigger: 'blur' },
+          { min: 6, message: '密码不少于6个长度', trigger: 'blur'}
+         
+         ]"> 
+         <el-col :span="10">
+          <el-input  type="password" clearable placeholder="请再次输入密码" v-model="DataForm.passwd3" ref="pwd3"></el-input>
+          </el-col>
+         </el-form-item>
+            <span style="color: #F56C6C; font-size: 10px; margin-left: 100px;" >{{err}}</span>
+         <el-form-item>
+          <el-button type="warning" @click="submitForm('DataForm')">更改</el-button>
+      </el-form-item>
+        </el-form>
+		</div>
+		</div>
+</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#modifyPwd",
+	data:{
+		DataForm:{
+      		username:"张三",
+      		userphone:"15027707570",
+            passwd1:"",
+            passwd2:"",
+            passwd3:"",
+      	},
+        err:"",
+        flaguser:true,
+	},
+	methods:{
+        getUser(){
+            var that =this;
+            if(that.flaguser){
+                axios.post("/AlreadyLogin")
+                    .then(function (response) {
+                        that.flaguser = false;
+                        that.DataForm = response.data;
+                        //alert(that.DataForm.username+","+that.DataForm.userphone+","+that.DataForm.userhead);
+                    }, function (err) {
+                        alert(err);
+                    });
+            }
+        },
+        submitForm:function(DataForm){
+            var that = this;
+            this.$refs[DataForm].validate((valid) => {
+                if (valid) {
+                    axios.post("/modifypassword","oldpwd="+that.DataForm.passwd1+"&newpwd1="+that.DataForm.passwd2+"&newpwd2="+that.DataForm.passwd3)
+                        .then(function (response) {
+                            if(response.data=="旧密码不正确!"){
+                                that.$refs.pwd1.focus();
+                                that.DataForm.passwd1 = "";
+                                that.err = response.data;
+                            }else if(response.data=="新旧密码不能一致!"){
+                                that.$refs.pwd2.focus();
+                                that.DataForm.passwd2 = "";
+                                that.DataForm.passwd3 = "";
+                                that.err = response.data;
+                            }else if(response.data=="两次密码不一致!"){
+                                that.$refs.pwd2.focus();
+                                that.DataForm.passwd2 = "";
+                                that.DataForm.passwd3 = "";
+                                that.err = response.data;
+                            } else {
+                                that.err = "";
+                                that.DataForm.passwd1 = "";
+                                that.DataForm.passwd2 = "";
+                                that.DataForm.passwd3 = "";
+                                that.$message({
+                                    type: 'success',
+                                    message: '修改成功!'
+                                });
+                            }
+                        }, function (err) {
+                            alert(err);
+                        });
+                } else {
+                    console.log('error submit!!');
+                    return false;
+                }
+            });
+        },
+	}
+})
+</script>
+</html>

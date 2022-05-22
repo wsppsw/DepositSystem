@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+	<script type="text/javascript" src="../js/vue.js"></script>
+	<link rel="stylesheet" type="text/css" href="../element-ui/lib/theme-chalk/index.css">
+	<script type="text/javascript" src="../element-ui/lib/index.js"></script>
+	<script type="text/javascript" src="../js/jquery-3.3.1.min.js"></script>
+	<script type="text/javascript" src="../js/axios.js"></script>
+	<style type="text/css">
+	.el-button{
+		margin-left: 240px;
+	}
+	.el-button:first-child{
+		margin-top: 30px;
+	}
+	</style>
+</head>
+<body>
+	<div id="div">
+		<el-button type="warning" plain  @click="selectway1">密保验证找回</el-button>
+		<el-divider style="background-color: white; color: white;"><i class="el-icon-mobile-phone"></i></el-divider>
+		<el-button type="warning" plain  @click="selectway2">手机验证找回</el-button>
+	</div>
+</body>
+<script type="text/javascript">
+new Vue({
+	el:"#div",
+	data:{
+
+	},
+	methods:{
+		selectway1(){
+			location.href="/verifyquestion";
+		},
+		selectway2(){
+			location.href="/verifyphone";
+		}
+	}
+})
+</script>
+</html>
