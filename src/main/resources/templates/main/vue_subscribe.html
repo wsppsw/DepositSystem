@@ -188,9 +188,9 @@
 
 		<el-dialog  title="查看仓库" :visible.sync="dialogwarehouse" width="1000px" >
 			<el-table :data="warehouse" @row-click="clickRow"  @selection-change="handleSelectionChange" height="300">
-				<el-table-column prop="city" label="所属区域" width="100">
+				<el-table-column prop="city" label="所属区域" width="150">
 				</el-table-column>
-				<el-table-column prop="hsize" label="仓库大小" width="200">
+				<el-table-column prop="hsize" label="仓库大小" width="150">
 				</el-table-column>
 				<el-table-column prop="address" label="仓库地址" width="550">
 				</el-table-column>
