@@ -354,7 +354,7 @@ public class OrderController {
         return array.toString();
     }
 
-    //查看未完成审核订单
+    //查看未完成订单
     @RequestMapping("/unfinishOrder")
     @ResponseBody
     public String tounfinishOrder(HttpServletRequest request) throws Exception {
@@ -382,7 +382,7 @@ public class OrderController {
         return array.toString();
     }
 
-    //查看未完成审核订单
+    //查看未通过审核订单
     @RequestMapping("/modifyunOrder")
     @ResponseBody
     public String tomodifyunOrder(HttpServletRequest request) throws Exception {
@@ -408,6 +408,44 @@ public class OrderController {
             }
         }
 
+        return array.toString();
+    }
+
+    //修改未通过的订单
+    @RequestMapping("/modifyAuditOrder")
+    @ResponseBody
+    public String tomodifyAuditOrder(HttpServletRequest request) throws Exception {
+        if(imgsrc.equals("")){
+            Thread.currentThread().sleep(2000);
+        }
+
+        String oid = request.getParameter("oid");
+        Order order = orderServiceImp.findbyoid(oid);
+        order.setItems_img(imgsrc);
+        order.setAudit(0);
+        orderServiceImp.modifyordr(order);
+        imgsrc="";
+        String name = (String) request.getSession().getAttribute("username");
+        User user = userServiceImp.findbyName(name);
+        List<Order> list = orderServiceImp.findallOrder(user.getUid());
+        JSONArray array = new JSONArray();
+        if(list.size()!=0){
+            for(Order o:list){
+                if(o.getAudit()==1){
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("oid",o.getOid());
+                    jsonObject.put("cid",o.getCid());
+                    jsonObject.put("cname",o.getCname());
+                    jsonObject.put("cphone",o.getCphone());
+                    jsonObject.put("ccity",o.getCcity());
+                    jsonObject.put("caddress",o.getCaddress());
+                    jsonObject.put("otype",o.getOtype());
+                    jsonObject.put("items",o.getItems());
+                    jsonObject.put("cmessage",o.getCmessage());
+                    array.put(jsonObject);
+                }
+            }
+        }
         return array.toString();
     }
 

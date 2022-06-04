@@ -8,6 +8,9 @@
     <select id="findallOrder" resultType="com.example.deposit_system.entity.Order" parameterType="Integer">
         SELECT o.oid,o.uid,o.cid,c.cname,c.cphone,c.caddress,c.ccity,o.wid,o.hid,o.starttime,o.endtime,o.status,o.audit,o.items,o.items_img,o.otype,o.cmessage FROM tb_order o,tb_user u,tb_consignee c,tb_warehouse h,tb_worker w WHERE u.uid = o.uid AND o.cid = c.cid AND o.wid = w.wid AND o.hid = h.hid AND o.uid =#{uid}
     </select>
+    <select id="findbyoid" resultType="com.example.deposit_system.entity.Order" parameterType="String">
+        SELECT * FROM tb_order where oid=#{oid}
+    </select>
     <select id="findorderbywid" resultType="com.example.deposit_system.entity.Order" parameterType="Integer">
         SELECT o.oid,o.uid,o.cid,c.cname,c.cphone,c.caddress,c.ccity,o.wid,o.hid,o.starttime,o.endtime,o.status,o.audit,o.items,o.items_img,o.otype,o.cmessage FROM tb_order o,tb_user u,tb_consignee c,tb_warehouse h,tb_worker w WHERE u.uid = o.uid AND o.cid = c.cid AND o.wid = w.wid AND o.hid = h.hid AND o.wid =#{wid}
     </select>

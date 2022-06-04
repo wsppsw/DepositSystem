@@ -14,6 +14,7 @@ import java.util.List;
 public interface OrderSerivce {
     public List<Order> findallOrder(Integer uid);
     public List<Order> findAll();
+    public Order findbyoid(String oid);
     public PageInfo<Order> findallpage( Integer pageNum, Integer pageSize);
     public int addOrder(Order order);
     public int modifyordr(Order order);

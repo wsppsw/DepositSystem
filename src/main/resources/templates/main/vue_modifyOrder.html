@@ -103,15 +103,16 @@
 		<el-form-item label="上传文件" >
            <el-upload
 			  drag
-			  action="https://jsonplaceholder.typicode.com/posts/"
+			  ref="upload"
+			  action="/fileupitems"
 			  multiple
 			  :limit=limitNum
 			  list-type="picture"
 			  :auto-upload="false"
-        	  :on-exceed="handleExceed"  
-              :before-upload="handleBeforeUpload"
-              :on-preview="handlePictureCardPreview"
-              :on-remove="handleRemove"
+			  :on-exceed="handleExceed"
+			  :before-upload="handleBeforeUpload"
+			  :on-preview="handlePictureCardPreview"
+			  :on-remove="handleRemove"
 			  >
 			  <i class="el-icon-upload"></i>
 			  <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -145,6 +146,7 @@ new Vue({
 		}
 		],
 		 orderForm:{
+			oid:"",
 		 	cname:"",
 		 	cphone:"",
 		 	caddress:"",
@@ -176,15 +178,50 @@ new Vue({
 						});
 			}
 		},
+		getcityData(){
+			var that = this;
+			axios.post("/getCitys")
+					.then(function (response) {
+						that.options = response.data;
+						}, function (err) {
+							alert(err);
+					});
+
+		},
 		editC(row){
 			var that = this;
+			this.getcityData();
 		 	that.dialogorder = true;
+		 	that.orderForm.oid = row.oid;
 		 	that.orderForm.cname = row.cname;
 		 	that.orderForm.cphone = row.cphone;
 		 	that.orderForm.caddress = row.caddress;
 			that.orderForm.ccity = row.ccity.split(",");
 		 	that.orderForm.cmessage = row.cmessage;
 		 	//alert(row.ccity+"__"+that.orderForm.ccity[0]);
+		},
+		addO(orderForm){
+			var that = this;
+			this.$refs[orderForm].validate((valid) => {
+				if (valid) {
+					that.uploadFile();
+					axios.post("/modifyAuditOrder", "oid="+that.orderForm.oid)
+							.then(function (response) {
+								alert("###");
+								that.tableData = response.data;
+								that.dialogorder = false;
+								that.$message({
+									type: 'success',
+									message: '订单修改成功！'
+								});
+							}, function (err) {
+								alert(err);
+							});
+				} else {
+					console.log('error submit!!');
+					return false;
+				}
+			});
 		},
 		changeStatus($event,num){
 			var that = this;
@@ -203,9 +240,9 @@ new Vue({
           message: '请上传格式为image/png, image/gif, image/jpg, image/jpeg的图片'
         })
       }
-      alert(file.size);
+      //alert(file.size);
       let size = file.size / 1024 / 1024 / 2
-		alert(size);
+		//alert(size);
       if(size > 2) {
         this.$notify.warning({
           title: '警告',
@@ -227,8 +264,9 @@ new Vue({
      this.dialogimg = true;
     },
     uploadFile() {
-      this.$refs.upload.submit();
 
+      this.$refs.upload.submit();
+      alert("!!");
     },
 	}
 })

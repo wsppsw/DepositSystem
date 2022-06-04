@@ -170,8 +170,8 @@ class DepositSystemApplicationTests {
         List<Citys> list1 = citysSerivceImp.findCity1();
         List<Citys> list2 = citysSerivceImp.findCity2();
         List<Citys> list3 = citysSerivceImp.findCity3();
-        System.out.println(wareHouseServiceImp.findOne("昌平"));
-
+        //System.out.println(wareHouseServiceImp.findOne("昌平"));
+        System.out.println(orderServiceImp.findbyoid("370f3b03c849468ebec7364acef40311"));
     }
 
 

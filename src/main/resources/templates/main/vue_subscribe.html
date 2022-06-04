@@ -56,7 +56,6 @@
 <body>
 	<div id="div" v-loading.fullscreen.lock="fullscreenLoading">
 		{{openFullScreen()}}
-		<!--{{getcityData()}} -->
 	   <div id="order1">
 	   <div id="order2">
 	   <el-form :model="orderForm" status-icon  ref="orderForm" size="medium" label-width="100px" :label-position="left" style="margin-top: 20px;">
@@ -393,18 +392,6 @@ new Vue({
     close(){
 		this.visibleLine = "none";
     },
-	getcityData(){
-		var that = this;
-		if(that.flagcity){
-			axios.post("/getCityData")
-					.then(function (response) {
-						that.options = response.data;
-						that.flagcity = false;
-					}, function (err) {
-						alert(err);
-					});
-		}
-	},
 	warehouses(){
 		this.getallwarehouse();
 		this.dialogwarehouse = true;

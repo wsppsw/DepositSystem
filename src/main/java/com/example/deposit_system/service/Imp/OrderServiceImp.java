@@ -33,6 +33,11 @@ public class OrderServiceImp implements OrderSerivce {
     }
 
     @Override
+    public Order findbyoid(String oid) {
+        return orderMapper.findbyoid(oid);
+    }
+
+    @Override
     public PageInfo<Order> findallpage(Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         List<Order> list = orderMapper.findAll();
