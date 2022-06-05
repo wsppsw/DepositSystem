@@ -118,6 +118,7 @@
 			visibleupload:"none",//控制上传按钮显示与隐藏
 			codeerr:"",
 			flagphone:true,
+			phone:"",
 		},
 		methods:{
 			getUser(){
@@ -128,7 +129,7 @@
 								that.flaguser = false;
 								that.DataForm = response.data;
 								that.DataForm.userhead = "../"+response.data.userhead;
-								alert(that.DataForm.userhead);
+								that.DataForm.userphone = that.DataForm.userphone.substring(0,3)+"****"+that.DataForm.userphone.substring(7);
 								//alert(that.DataForm.username+","+that.DataForm.userphone+","+that.DataForm.userhead);
 							}, function (err) {
 								alert(err);
@@ -145,7 +146,7 @@
 					that.disabled=true;
 					that.code= "已经发送("+seconds+"s)";
 					if(that.flagphone){
-						axios.post("/Msphone", "phone=" + that.userphone)
+						axios.post("/Msphone", "phone=" + that.phone)
 								.then(function (response) {
 									that.flagphone = false;
 									alert(response.data);

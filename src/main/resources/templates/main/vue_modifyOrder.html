@@ -207,7 +207,6 @@ new Vue({
 					that.uploadFile();
 					axios.post("/modifyAuditOrder", "oid="+that.orderForm.oid)
 							.then(function (response) {
-								alert("###");
 								that.tableData = response.data;
 								that.dialogorder = false;
 								that.$message({
