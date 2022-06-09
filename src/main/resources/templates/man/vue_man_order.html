@@ -209,7 +209,9 @@ new Vue({
 		}, {
 			value: '0',
 			label: '正在审核中'
-
+		},{
+		 	value:'2',
+			label:"审核完成"
 		}],
 		formLabelWidth:'100px',
 		pageSize:"5",//一页显示数量
@@ -264,8 +266,10 @@ new Vue({
 
 									if(that.oData[i].audit=="0"){
 										that.oData[i].audit="正在审核中";
-									}else {
+									}else if(that.oData[i].audit=="1"){
 										that.oData[i].audit="未通过审核";
+									}else {
+										that.oData[i].audit="审核完成";
 									}
 								}
 							}
@@ -292,8 +296,10 @@ new Vue({
 
 								if(that.oData[i].audit=="0"){
 									that.oData[i].audit="正在审核中";
-								}else {
+								}else if(that.oData[i].audit=="1"){
 									that.oData[i].audit="未通过审核";
+								}else {
+									that.oData[i].audit="审核完成";
 								}
 							}
 						}
@@ -338,9 +344,11 @@ new Vue({
 			}
 			if(row.audit=="正在审核中"){
 				that.form.audit ="0";
-			}else {
+			}else if(row.audit=="未通过审核"){
 				that.form.audit ="1";
-			};
+			}else {
+				that.form.audit ="2";
+			}
 			var imgs = row.items_img.split(",");
 			this.dialogImageUrl1 = "../items_img/"+imgs[0];
 			this.dialogImageUrl2 = "../items_img/"+imgs[1];
@@ -375,8 +383,10 @@ new Vue({
 
 									  if(that.oData[i].audit=="0"){
 										  that.oData[i].audit="正在审核中";
-									  }else {
+									  }else if(that.oData[i].audit=="1"){
 										  that.oData[i].audit="未通过审核";
+									  }else {
+										  that.oData[i].audit="审核完成";
 									  }
 
 								  }
@@ -411,8 +421,10 @@ new Vue({
 
 									if(that.oData[i].audit=="0"){
 										that.oData[i].audit="正在审核中";
-									}else {
+									}else if(that.oData[i].audit=="1"){
 										that.oData[i].audit="未通过审核";
+									}else {
+										that.oData[i].audit="审核完成";
 									}
 								}
 							}
@@ -436,8 +448,10 @@ new Vue({
 
 									if(that.oData[i].audit=="0"){
 										that.oData[i].audit="正在审核中";
-									}else {
+									}else if(that.oData[i].audit=="1"){
 										that.oData[i].audit="未通过审核";
+									}else {
+										that.oData[i].audit="审核完成";
 									}
 								}
 							}
@@ -466,8 +480,10 @@ new Vue({
 
 									if(that.oData[i].audit=="0"){
 										that.oData[i].audit="正在审核中";
-									}else {
+									}else if(that.oData[i].audit=="1"){
 										that.oData[i].audit="未通过审核";
+									}else {
+										that.oData[i].audit="审核完成";
 									}
 								}
 							}
@@ -491,8 +507,10 @@ new Vue({
 
 									if(that.oData[i].audit=="0"){
 										that.oData[i].audit="正在审核中";
-									}else {
+									}else if(that.oData[i].audit=="1"){
 										that.oData[i].audit="未通过审核";
+									}else {
+										that.oData[i].audit="审核完成";
 									}
 								}
 							}
@@ -521,8 +539,10 @@ new Vue({
 
 									if(that.oData[i].audit=="0"){
 										that.oData[i].audit="正在审核中";
-									}else {
+									}else if(that.oData[i].audit=="1"){
 										that.oData[i].audit="未通过审核";
+									}else {
+										that.oData[i].audit="审核完成";
 									}
 								}
 							}
@@ -546,8 +566,10 @@ new Vue({
 
 									if(that.oData[i].audit=="0"){
 										that.oData[i].audit="正在审核中";
-									}else {
+									}else if(that.oData[i].audit=="1"){
 										that.oData[i].audit="未通过审核";
+									}else {
+										that.oData[i].audit="审核完成";
 									}
 								}
 							}

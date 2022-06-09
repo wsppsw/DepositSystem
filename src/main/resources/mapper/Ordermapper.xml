@@ -18,7 +18,7 @@
         insert into tb_order values (#{oid},#{uid},#{wid},#{cid},#{hid},#{starttime},#{endtime},#{status},#{audit},#{items},#{items_img},#{otype},#{cmessage})
     </insert>
     <update id="modifyordr" parameterType="com.example.deposit_system.entity.Order">
-        update tb_order set wid=#{wid},endtime=#{endtime},status=#{status},audit=#{audit},items=#{items},items_img=#{items_img},otype=#{otype},cmessage=#{cmessage} where oid =#{oid}
+        update tb_order set endtime=#{endtime},status=#{status},audit=#{audit},items=#{items},items_img=#{items_img},otype=#{otype},cmessage=#{cmessage} where oid =#{oid}
     </update>
     <delete id="deleteOrder" parameterType="String">
         delete from tb_order where oid=#{oid}

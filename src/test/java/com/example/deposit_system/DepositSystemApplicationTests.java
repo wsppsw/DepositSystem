@@ -19,6 +19,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -174,6 +175,79 @@ class DepositSystemApplicationTests {
         System.out.println(orderServiceImp.findbyoid("370f3b03c849468ebec7364acef40311"));
     }
 
+    @Test
+    void getbaidu() throws JSONException {
+        String urls="http://ip.ws.126.net/ipquery?ie=utf-8";
+        String code ="";
+        StringBuffer result = new StringBuffer();
+        try {
+            URL url = new URL(urls);
+            URLConnection conn = url.openConnection();
+            HttpURLConnection httpUrlConnection = (HttpURLConnection) conn;
+            httpUrlConnection.setConnectTimeout(300000);
+            httpUrlConnection.setReadTimeout(300000);
+            httpUrlConnection.connect();
+            code = new Integer(httpUrlConnection.getResponseCode()).toString();
+            BufferedReader in = null;
+            if(code.equals("200")){
+                in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"GBk"));
+            }else {
+                urls = "http://api.map.baidu.com/location/ip?ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw";
+                URL url1 = new URL(urls);
+                URLConnection conns = url1.openConnection();
+                in = new BufferedReader(new InputStreamReader(conns.getInputStream(),"utf-8"));
+            }
+            //String message = httpUrlConnection.getResponseMessage();
+           // System.out.println("getResponseCode code ="+ code);
+            String line;
+            while((line = in.readLine()) != null){
+                result.append(line);
+            }
+            in.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = null;
+        String global_city = "";
+        String global_province = "";
+        if(code.equals("200")){
+            String[] data = result.toString().split("=");
+            jsonObject = new JSONObject(data[3]);
+            global_city = jsonObject.get("city").toString();
+            global_province = jsonObject.getString("province").toString();
+        }else {
+            jsonObject = new JSONObject(result.toString());
+            global_city = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city");
+            global_province = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("province");
+
+        }
+        System.out.println(global_city+"---"+global_province);
+        /*
+        String urls="http://api.map.baidu.com/location/ip?ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw";
+        StringBuffer result = new StringBuffer();
+        try {
+            URL url = new URL(urls);
+            URLConnection conn = url.openConnection();
+            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));
+            String line;
+            while((line = in.readLine()) != null){
+                result.append(line);
+            }
+            in.close();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        JSONObject jsonObject = new JSONObject(result.toString());
+        System.out.println(jsonObject);
+        String city = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city");
+        System.out.println(city);
+
+         */
+    }
 
     @Test
     void getcity() throws IOException, JSONException {

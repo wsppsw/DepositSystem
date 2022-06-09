@@ -364,7 +364,7 @@ public class OrderController {
         JSONArray array = new JSONArray();
         if(list.size()!=0){
             for(Order o:list){
-                if(o.getStatus()==0){
+                if(o.getStatus()==0&&o.getAudit()==2){
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("oid",o.getOid());
                     jsonObject.put("cid",o.getCid());

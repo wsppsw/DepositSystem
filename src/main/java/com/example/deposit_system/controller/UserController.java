@@ -23,6 +23,7 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
@@ -192,11 +193,27 @@ public class UserController {
     @ResponseBody
     public String toCity() throws JSONException {
         String urls="http://ip.ws.126.net/ipquery?ie=utf-8";
+        String code ="";
         StringBuffer result = new StringBuffer();
         try {
             URL url = new URL(urls);
             URLConnection conn = url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"GBK"));
+            HttpURLConnection httpUrlConnection = (HttpURLConnection) conn;
+            httpUrlConnection.setConnectTimeout(300000);
+            httpUrlConnection.setReadTimeout(300000);
+            httpUrlConnection.connect();
+            code = new Integer(httpUrlConnection.getResponseCode()).toString();
+            BufferedReader in = null;
+            if(code.equals("200")){
+                in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"GBk"));
+            }else {
+                urls = "http://api.map.baidu.com/location/ip?ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw";
+                URL url1 = new URL(urls);
+                URLConnection conns = url1.openConnection();
+                in = new BufferedReader(new InputStreamReader(conns.getInputStream(),"utf-8"));
+            }
+            //String message = httpUrlConnection.getResponseMessage();
+            // System.out.println("getResponseCode code ="+ code);
             String line;
             while((line = in.readLine()) != null){
                 result.append(line);
@@ -207,12 +224,20 @@ public class UserController {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String[] data = result.toString().split("=");
+        JSONObject jsonObject = null;
+        if(code.equals("200")){
+            String[] data = result.toString().split("=");
+            jsonObject = new JSONObject(data[3]);
+            global_city = jsonObject.get("city").toString();
+            global_province = jsonObject.getString("province").toString();
+            return jsonObject.get("city").toString();
+        }else {
+            jsonObject = new JSONObject(result.toString());
+            global_city = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city");
+            global_province = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("province");
+            return jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city").toString();
+        }
 
-        JSONObject jsonObject = new JSONObject(data[3]);
-        global_city = jsonObject.get("city").toString();
-        global_province = jsonObject.getString("province").toString();
-        return jsonObject.get("city").toString();
     }
 
     //今日天气预报
@@ -754,7 +779,7 @@ public class UserController {
             jsonObject.put("label",c.getLabel());
             array.put(jsonObject);
         }
-        System.out.println("获取2级城市");
+       // System.out.println("获取2级城市");
         return array.toString();
     }
 
@@ -855,7 +880,7 @@ public class UserController {
         }
 
 
-        System.out.println(code);
+        //System.out.println(code);
         String urls="https://c.m.163.com/ug/api/wuhan/app/data/list-total";
         StringBuffer result = new StringBuffer();
         try {
