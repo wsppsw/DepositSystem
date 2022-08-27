@@ -33,7 +33,7 @@
     onSuccess: function() {
       document.getElementById('msg').innerHTML = '登录成功！';
       window.opener=null;
-      window.open("/main", "_top").close();
+      window.open("http://localhost:8066/main", "_top").close();
     },
     onFail: cleanMsg,
     onRefresh: cleanMsg
