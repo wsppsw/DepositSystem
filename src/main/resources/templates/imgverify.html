@@ -31,9 +31,9 @@
   jigsaw.init({
     el: document.getElementById('captcha'),
     onSuccess: function() {
-      document.getElementById('msg').innerHTML = '登录成功！';
-      window.opener=null;
-      window.open("http://localhost:8066/main", "_top").close();
+		document.getElementById('msg').innerHTML = '验证成功！';
+		window.opener=null;
+		window.open("/main", "_top").close();
     },
     onFail: cleanMsg,
     onRefresh: cleanMsg

@@ -192,7 +192,7 @@ public class UserController {
     @RequestMapping("/city")
     @ResponseBody
     public String toCity() throws JSONException {
-        String urls="http://ip.ws.126.net/ipquery?ie=utf-8";
+        String urls="http://api.map.baidu.com/location/ip?ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw";
         String code ="";
         StringBuffer result = new StringBuffer();
         try {
@@ -205,12 +205,9 @@ public class UserController {
             code = new Integer(httpUrlConnection.getResponseCode()).toString();
             BufferedReader in = null;
             if(code.equals("200")){
-                in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"GBk"));
+                in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));
             }else {
-                urls = "http://api.map.baidu.com/location/ip?ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw";
-                URL url1 = new URL(urls);
-                URLConnection conns = url1.openConnection();
-                in = new BufferedReader(new InputStreamReader(conns.getInputStream(),"utf-8"));
+               return "false";
             }
             //String message = httpUrlConnection.getResponseMessage();
             // System.out.println("getResponseCode code ="+ code);
@@ -225,18 +222,10 @@ public class UserController {
             e.printStackTrace();
         }
         JSONObject jsonObject = null;
-        if(code.equals("200")){
-            String[] data = result.toString().split("=");
-            jsonObject = new JSONObject(data[3]);
-            global_city = jsonObject.get("city").toString();
-            global_province = jsonObject.getString("province").toString();
-            return jsonObject.get("city").toString();
-        }else {
-            jsonObject = new JSONObject(result.toString());
-            global_city = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city");
-            global_province = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("province");
-            return jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city").toString();
-        }
+        jsonObject = new JSONObject(result.toString());
+        global_city = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city");
+        global_province = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("province");
+        return jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city").toString();
 
     }
 
@@ -277,7 +266,7 @@ public class UserController {
         arr[2]=object1.getString("wendu")+"℃";
         JSONObject jsonObject2 = array.getJSONObject(0);
         String type=jsonObject2.getString("type").toString();
-        System.out.println("城市"+city+","+type+"--"+arr[2]);
+        //System.out.println("城市"+city+","+type+"--"+arr[2]);
         JSONObject obj = new JSONObject();
         obj.put("wendu",arr[2]);
         obj.put("type",type);

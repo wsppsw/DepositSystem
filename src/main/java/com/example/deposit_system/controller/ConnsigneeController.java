@@ -8,6 +8,7 @@ import com.example.deposit_system.service.Imp.CitysSerivceImp;
 import com.example.deposit_system.service.Imp.ConsigneeServiceImp;
 import com.example.deposit_system.service.Imp.UCServiceImp;
 import com.example.deposit_system.service.Imp.UserServiceImp;
+import com.example.deposit_system.utils.RedisUtil;
 import com.github.pagehelper.PageInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.ws.Action;
 import java.io.IOException;
 import java.util.List;
 
@@ -46,16 +46,32 @@ public class ConnsigneeController {
     @Autowired
     private CitysSerivceImp citysSerivceImp;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     //查看收货地址
     @RequestMapping( "/look")
     @ResponseBody
     public PageInfo<Consignee> tolook(HttpServletRequest request) throws JSONException {
-        String name = (String) request.getSession().getAttribute("username");
-        User user = userServiceImp.findbyName(name);
+        //先判断redis是否有缓存，无则直接从数据库里取数据再添加进redis
         Integer pageNum = Integer.valueOf(request.getParameter("pageNum"));
-        Integer pageSize =Integer.valueOf(request.getParameter("pageSize"));
-        PageInfo<Consignee> pageInfo = consigneeServiceImp.findallPage(user.getUid(),pageNum,pageSize);
-        return pageInfo;
+        PageInfo<Consignee> page = null;
+        if(redisUtil.hasKey("address")){
+            page =(PageInfo<Consignee>) redisUtil.get("address");
+        }
+
+
+        if(page.getPageNum()==pageNum){
+            return (PageInfo<Consignee>) redisUtil.get("address");
+        }else {
+            String name = (String) request.getSession().getAttribute("username");
+            User user = userServiceImp.findbyName(name);
+            Integer pageSize =Integer.valueOf(request.getParameter("pageSize"));
+            PageInfo<Consignee> pageInfo = consigneeServiceImp.findallPage(user.getUid(),pageNum,pageSize);
+            redisUtil.set("address",pageInfo);
+            return pageInfo;
+        }
+
     }
 
     //修改收货地址
@@ -79,20 +95,7 @@ public class ConnsigneeController {
         Integer pageNum = Integer.valueOf(request.getParameter("pageNum"));
         Integer pageSize =Integer.valueOf(request.getParameter("pageSize"));
         PageInfo<Consignee> pageInfo = consigneeServiceImp.findallPage(uid,pageNum,pageSize);
-        /*
-        List<Consignee> list= consigneeServiceImp.findC(uid);
-        JSONArray jsonArray = new JSONArray();
-        if(list.size()!=0){
-            for(Consignee consignee: list){
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("cid",consignee.getCid());
-                jsonObject.put("cname",consignee.getCname());
-                jsonObject.put("cphone",consignee.getCphone());
-                jsonObject.put("caddress",consignee.getCaddress());
-                jsonObject.put("ccity",consignee.getCcity());
-                jsonArray.put(jsonObject);
-            }
-        }*/
+        redisUtil.set("address",pageInfo);
         return pageInfo;
     }
 
@@ -108,20 +111,7 @@ public class ConnsigneeController {
         Integer pageNum = Integer.valueOf(request.getParameter("pageNum"));
         Integer pageSize =Integer.valueOf(request.getParameter("pageSize"));
         PageInfo<Consignee> pageInfo = consigneeServiceImp.findallPage(uid,pageNum,pageSize);
-        /*
-        List<Consignee> list= consigneeServiceImp.findC(uid);
-        JSONArray jsonArray = new JSONArray();
-        if(list.size()!=0){
-            for(Consignee consignee: list){
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("cid",consignee.getCid());
-                jsonObject.put("cname",consignee.getCname());
-                jsonObject.put("cphone",consignee.getCphone());
-                jsonObject.put("caddress",consignee.getCaddress());
-                jsonObject.put("ccity",consignee.getCcity());
-                jsonArray.put(jsonObject);
-            }
-        }*/
+        redisUtil.set("address",pageInfo);
         return pageInfo;
     }
 
@@ -148,19 +138,7 @@ public class ConnsigneeController {
         Integer pageNum = Integer.valueOf(request.getParameter("pageNum"));
         Integer pageSize =Integer.valueOf(request.getParameter("pageSize"));
         PageInfo<Consignee> pageInfo = consigneeServiceImp.findallPage(uid,pageNum,pageSize);
-        /*List<Consignee> list= consigneeServiceImp.findC(uid);
-        JSONArray jsonArray = new JSONArray();
-        if(list.size()!=0){
-            for(Consignee consignee: list){
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("cid",consignee.getCid());
-                jsonObject.put("cname",consignee.getCname());
-                jsonObject.put("cphone",consignee.getCphone());
-                jsonObject.put("caddress",consignee.getCaddress());
-                jsonObject.put("ccity",consignee.getCcity());
-                jsonArray.put(jsonObject);
-            }
-        }*/
+        redisUtil.set("address",pageInfo);
         return pageInfo;
     }
 

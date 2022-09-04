@@ -2,6 +2,8 @@ package com.example.deposit_system.entity;
 
 import lombok.Data;
 
+import java.io.Serializable;
+
 /**
  * @author 欧皇表哥
  * @create 2021/11/22 15:24

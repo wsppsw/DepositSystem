@@ -3,6 +3,7 @@ package com.example.deposit_system;
 import com.example.deposit_system.entity.*;
 import com.example.deposit_system.service.Imp.*;
 import com.example.deposit_system.service.PhoneService;
+import com.example.deposit_system.utils.RedisUtil;
 import com.github.pagehelper.PageInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -13,7 +14,10 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.RedisTemplate;
 
 
 import java.io.BufferedReader;
@@ -53,14 +57,38 @@ class DepositSystemApplicationTests {
     @Autowired
     private PhoneService phoneService;
 
+    @Autowired
+    @Qualifier("redisTemplate")
+    private RedisTemplate redisTemplate;
+
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Test
+    void getRedis(){
+        redisUtil.set("pp","123");
+        if(redisUtil.hasKey("pp")){
+            System.out.println(redisUtil.get("pp"));
+            redisUtil.set("pp","456"+"1");
+            System.out.println(redisUtil.get("pp"));
+        }else {
+            System.out.println("无redis缓存");
+            redisUtil.set("pp","888");
+            System.out.println(redisUtil.get("pp"));
+        }
+        /*PageInfo<Consignee> pageInfo = consigneeServiceImp.findallPage(1,1,10);
+        redisUtil.set("page",pageInfo);
+        System.out.println(redisUtil.get("page"));*/
+    }
+
     @Test
     void gets(){
 
 //        List<Worker> list = workerServiceImp.findall("服务");
 //        System.out.println(list);
        // List<Order> list = orderServiceImp.findallOrder(1);
-        String c = "北京市";
-        System.out.println();
+
+        System.out.println(wareHouseServiceImp.findOne("北京市"));
 
     }
 
@@ -175,79 +203,6 @@ class DepositSystemApplicationTests {
         System.out.println(orderServiceImp.findbyoid("370f3b03c849468ebec7364acef40311"));
     }
 
-    @Test
-    void getbaidu() throws JSONException {
-        String urls="http://ip.ws.126.net/ipquery?ie=utf-8";
-        String code ="";
-        StringBuffer result = new StringBuffer();
-        try {
-            URL url = new URL(urls);
-            URLConnection conn = url.openConnection();
-            HttpURLConnection httpUrlConnection = (HttpURLConnection) conn;
-            httpUrlConnection.setConnectTimeout(300000);
-            httpUrlConnection.setReadTimeout(300000);
-            httpUrlConnection.connect();
-            code = new Integer(httpUrlConnection.getResponseCode()).toString();
-            BufferedReader in = null;
-            if(code.equals("200")){
-                in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"GBk"));
-            }else {
-                urls = "http://api.map.baidu.com/location/ip?ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw";
-                URL url1 = new URL(urls);
-                URLConnection conns = url1.openConnection();
-                in = new BufferedReader(new InputStreamReader(conns.getInputStream(),"utf-8"));
-            }
-            //String message = httpUrlConnection.getResponseMessage();
-           // System.out.println("getResponseCode code ="+ code);
-            String line;
-            while((line = in.readLine()) != null){
-                result.append(line);
-            }
-            in.close();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        JSONObject jsonObject = null;
-        String global_city = "";
-        String global_province = "";
-        if(code.equals("200")){
-            String[] data = result.toString().split("=");
-            jsonObject = new JSONObject(data[3]);
-            global_city = jsonObject.get("city").toString();
-            global_province = jsonObject.getString("province").toString();
-        }else {
-            jsonObject = new JSONObject(result.toString());
-            global_city = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city");
-            global_province = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("province");
-
-        }
-        System.out.println(global_city+"---"+global_province);
-        /*
-        String urls="http://api.map.baidu.com/location/ip?ak=vE5EkHqq2Q6wMRIdX8FSGChnEKj982mw";
-        StringBuffer result = new StringBuffer();
-        try {
-            URL url = new URL(urls);
-            URLConnection conn = url.openConnection();
-            BufferedReader in = new BufferedReader(new InputStreamReader(conn.getInputStream(),"utf-8"));
-            String line;
-            while((line = in.readLine()) != null){
-                result.append(line);
-            }
-            in.close();
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        JSONObject jsonObject = new JSONObject(result.toString());
-        System.out.println(jsonObject);
-        String city = jsonObject.getJSONObject("content").getJSONObject("address_detail").getString("city");
-        System.out.println(city);
-
-         */
-    }
 
     @Test
     void getcity() throws IOException, JSONException {

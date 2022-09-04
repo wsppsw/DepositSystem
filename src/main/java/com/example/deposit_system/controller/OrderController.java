@@ -3,6 +3,7 @@ package com.example.deposit_system.controller;
 import com.example.deposit_system.entity.*;
 import com.example.deposit_system.mapper.WorkerMapper;
 import com.example.deposit_system.service.Imp.*;
+import com.example.deposit_system.utils.RedisUtil;
 import com.github.pagehelper.PageInfo;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -45,6 +46,9 @@ public class OrderController {
 
     @Autowired
     private UCServiceImp ucServiceImp;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     private String imgsrc="";//统计图片
 
@@ -248,23 +252,8 @@ public class OrderController {
                 }
             }
         }
-
         return array.toString();
 
-/*
-        PageInfo<Order> pageInfo = orderServiceImp.findallPage(user.getUid(),pageNum,pageSize);
-        List<Order> list = pageInfo.getList();
-        List<Order> list1 = new ArrayList<>();
-        for(Order order:list){
-            if(order.getAudit()==0){
-                Order o = order;
-                list1.add(o);
-            }
-        }
-        pageInfo.setList(list1);
-        System.out.println("待审核："+pageInfo);
-        return pageInfo;
-*/
     }
 
     //取消待审核订单
@@ -301,6 +290,7 @@ public class OrderController {
     @RequestMapping("/finishOrder")
     @ResponseBody
     public String tofinishOrder(HttpServletRequest request) throws Exception {
+
         String name = (String) request.getSession().getAttribute("username");
         User user = userServiceImp.findbyName(name);
 

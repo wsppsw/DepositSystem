@@ -32,7 +32,6 @@
     el: document.getElementById('captcha'),
     onSuccess: function() {
       document.getElementById('msg').innerHTML = '验证成功！';
-      
       window.opener=null;
       window.open("/regist", "_top").close();
     },
