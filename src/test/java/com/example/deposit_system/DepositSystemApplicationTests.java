@@ -5,6 +5,7 @@ import com.example.deposit_system.service.Imp.*;
 import com.example.deposit_system.service.PhoneService;
 import com.example.deposit_system.utils.RedisUtil;
 import com.github.pagehelper.PageInfo;
+import org.jcp.xml.dsig.internal.SignerOutputStream;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -69,6 +70,7 @@ class DepositSystemApplicationTests {
         redisUtil.set("pp","123");
         if(redisUtil.hasKey("pp")){
             System.out.println(redisUtil.get("pp"));
+            System.out.println("tEXT");
         }else {
             System.out.println("无redis缓存");
             redisUtil.set("pp","888");
