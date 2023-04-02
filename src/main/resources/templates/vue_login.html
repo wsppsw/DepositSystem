@@ -184,8 +184,8 @@ new Vue({
         codeerr:"",//手机号登录报错
         phoneerr:"",//手机报错
 		userForm:{
-        	username:"",
-        	password:"",
+		    uname:"",//用户姓名
+            pwd:"",//用户密码
 		  },
 		userForm1:{
 			userphone:"",
@@ -212,7 +212,7 @@ new Vue({
                 var that = this;
                 this.$refs[userForm].validate((valid) => {
                     if (valid) {
-                        axios.post("/loginusername","username="+this.userForm.username+"&password="+this.userForm.password)
+                        axios.post("/loginusername",that.userForm)
                     .then(function(response){
                             if(response.data==true){
                                 //location.href="/index";

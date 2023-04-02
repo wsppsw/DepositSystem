@@ -14,6 +14,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -28,6 +29,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import java.util.zip.GZIPInputStream;
@@ -276,8 +278,17 @@ public class UserController {
     //用户名登录
     @RequestMapping("/loginusername")
     @ResponseBody
-    public String tologin(HttpServletRequest request){
-        String username = request.getParameter("username");
+    public String tologin(@RequestBody User users){
+        User user = new User();
+        if(userServiceImp.findbyName(users.getUname())!=null){
+            return "true";
+        }else if(!user.getPwd().equals(users.getPwd())){
+            return "用户或密码不存在!";
+        }else {
+
+            return "true";
+        }
+      /*  String username = request.getParameter("username");
         String password = request.getParameter("password");
         User user = new User();
         user= userServiceImp.findbyName(username);
@@ -288,10 +299,10 @@ public class UserController {
         }else {
             request.getSession().setAttribute("username",user.getUname());
             return "true";
-        }
+        }*/
     }
 
-    //手机号登录
+  /*  //手机号登录
     @RequestMapping("/loginuserphone")
     @ResponseBody
     public String tologin1(HttpServletRequest request){
@@ -307,7 +318,7 @@ public class UserController {
             request.getSession().setAttribute("username",user.getUname());
             return "true";
         }
-    }
+    }*/
 
     //发送手机验证码登录
     @RequestMapping("/loginsendphone")
