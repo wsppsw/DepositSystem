@@ -69,7 +69,6 @@ class DepositSystemApplicationTests {
         redisUtil.set("pp","123");
         if(redisUtil.hasKey("pp")){
             System.out.println(redisUtil.get("pp"));
-            System.out.println(redisUtil.get("pp"));
         }else {
             System.out.println("无redis缓存");
             redisUtil.set("pp","888");
