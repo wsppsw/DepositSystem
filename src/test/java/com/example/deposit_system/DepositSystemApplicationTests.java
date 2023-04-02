@@ -69,7 +69,6 @@ class DepositSystemApplicationTests {
         redisUtil.set("pp","123");
         if(redisUtil.hasKey("pp")){
             System.out.println(redisUtil.get("pp"));
-            redisUtil.set("pp","456"+"1");
             System.out.println(redisUtil.get("pp"));
         }else {
             System.out.println("无redis缓存");
@@ -88,7 +87,6 @@ class DepositSystemApplicationTests {
 //        System.out.println(list);
        // List<Order> list = orderServiceImp.findallOrder(1);
 
-        System.out.println(wareHouseServiceImp.findOne("北京市"));
 
     }
 
